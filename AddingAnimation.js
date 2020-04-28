@@ -894,9 +894,9 @@ ApplicationMain.create = function(config) {
 	ManifestResources.init(config);
 	var _this = app.meta;
 	if(__map_reserved["build"] != null) {
-		_this.setReserved("build","12");
+		_this.setReserved("build","13");
 	} else {
-		_this.h["build"] = "12";
+		_this.h["build"] = "13";
 	}
 	var _this1 = app.meta;
 	if(__map_reserved["company"] != null) {
@@ -5019,7 +5019,7 @@ GameReading.prototype = $extend(GameScene.prototype,{
 			++_g;
 			var b = new Balloon(word);
 			this.addChild(b);
-			b.addEventListener("click",$bind(this,this.tap));
+			b.addEventListener("touchBegin",$bind(this,this.tap));
 			b.set_x(x);
 			b.set_y(y);
 			x += b.get_width() * 1.5;
