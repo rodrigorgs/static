@@ -894,9 +894,9 @@ ApplicationMain.create = function(config) {
 	ManifestResources.init(config);
 	var _this = app.meta;
 	if(__map_reserved["build"] != null) {
-		_this.setReserved("build","16");
+		_this.setReserved("build","17");
 	} else {
-		_this.h["build"] = "16";
+		_this.h["build"] = "17";
 	}
 	var _this1 = app.meta;
 	if(__map_reserved["company"] != null) {
@@ -4892,6 +4892,7 @@ GameBalloon.prototype = $extend(GameScene.prototype,{
 	currentNumber: null
 	,soundWhere: null
 	,balloons: null
+	,balloonGroup: null
 	,clickNumber: function(e) {
 		if(!this.interactable) {
 			return;
@@ -4932,13 +4933,16 @@ GameBalloon.prototype = $extend(GameScene.prototype,{
 		this.startNumber();
 	}
 	,createBalloons: function() {
+		this.balloonGroup = new feathers_controls_LayoutGroup();
+		var layout = new RandomLayout();
+		layout.avoidCollision = true;
+		this.balloonGroup.set_layout(layout);
+		this.addChild(this.balloonGroup);
 		var i = 9;
 		while(i >= 1) {
 			var balloon = new Balloon("" + i);
-			balloon.set_x(Math.random() * (openfl_Lib.get_current().stage.stageWidth - balloon.get_width()));
-			balloon.set_y(Math.random() * (openfl_Lib.get_current().stage.stageHeight - balloon.get_height()));
 			balloon.addEventListener("click",$bind(this,this.clickNumber));
-			this.addChild(balloon);
+			this.balloonGroup.addChild(balloon);
 			this.balloons.h[i] = balloon;
 			--i;
 		}
@@ -5316,6 +5320,75 @@ ManifestResources.init = function(config) {
 	}
 };
 Math.__name__ = "Math";
+var feathers_layout_ILayout = function() { };
+$hxClasses["feathers.layout.ILayout"] = feathers_layout_ILayout;
+feathers_layout_ILayout.__name__ = "feathers.layout.ILayout";
+feathers_layout_ILayout.__isInterface__ = true;
+feathers_layout_ILayout.__interfaces__ = [openfl_events_IEventDispatcher];
+feathers_layout_ILayout.prototype = {
+	layout: null
+	,__class__: feathers_layout_ILayout
+};
+var RandomLayout = function(target) {
+	this.maxTriesToAvoidCollision = 10;
+	this.avoidCollision = false;
+	this.height = openfl_Lib.get_current().stage.stageHeight;
+	this.width = openfl_Lib.get_current().stage.stageWidth;
+	openfl_events_EventDispatcher.call(this,target);
+};
+$hxClasses["RandomLayout"] = RandomLayout;
+RandomLayout.__name__ = "RandomLayout";
+RandomLayout.__interfaces__ = [feathers_layout_ILayout];
+RandomLayout.__super__ = openfl_events_EventDispatcher;
+RandomLayout.prototype = $extend(openfl_events_EventDispatcher.prototype,{
+	width: null
+	,height: null
+	,avoidCollision: null
+	,maxTriesToAvoidCollision: null
+	,intersectsPrevious: function(items,i) {
+		var item = items[i];
+		var _g = 0;
+		var _g1 = i;
+		while(_g < _g1) {
+			var prev = _g++;
+			var prevItem = items[prev];
+			if(prevItem.getBounds(openfl_Lib.get_current().stage).intersects(item.getBounds(openfl_Lib.get_current().stage))) {
+				return true;
+			}
+		}
+		return false;
+	}
+	,moveToRandomPosition: function(item) {
+		item.set_x(Math.random() * (this.width - item.get_width()));
+		item.set_y(Math.random() * (this.height - item.get_height()));
+	}
+	,layout: function(items,measurements,result) {
+		var _g = 0;
+		var _g1 = items.length;
+		while(_g < _g1) {
+			var i = _g++;
+			var item = items[i];
+			if(this.avoidCollision) {
+				var tries = this.maxTriesToAvoidCollision;
+				while(true) {
+					this.moveToRandomPosition(item);
+					--tries;
+					if(!(tries > 0 && this.intersectsPrevious(items,i))) {
+						break;
+					}
+				}
+			} else {
+				this.moveToRandomPosition(item);
+			}
+		}
+		result.contentWidth = this.width;
+		result.contentHeight = this.height;
+		result.viewPortWidth = this.width;
+		result.viewPortHeight = this.height;
+		return result;
+	}
+	,__class__: RandomLayout
+});
 var Reflect = function() { };
 $hxClasses["Reflect"] = Reflect;
 Reflect.__name__ = "Reflect";
@@ -7553,15 +7626,6 @@ var feathers_layout_HorizontalAlign = $hxEnums["feathers.layout.HorizontalAlign"
 	,CENTER: {_hx_index:1,__enum__:"feathers.layout.HorizontalAlign",toString:$estr}
 	,RIGHT: {_hx_index:2,__enum__:"feathers.layout.HorizontalAlign",toString:$estr}
 	,JUSTIFY: {_hx_index:3,__enum__:"feathers.layout.HorizontalAlign",toString:$estr}
-};
-var feathers_layout_ILayout = function() { };
-$hxClasses["feathers.layout.ILayout"] = feathers_layout_ILayout;
-feathers_layout_ILayout.__name__ = "feathers.layout.ILayout";
-feathers_layout_ILayout.__isInterface__ = true;
-feathers_layout_ILayout.__interfaces__ = [openfl_events_IEventDispatcher];
-feathers_layout_ILayout.prototype = {
-	layout: null
-	,__class__: feathers_layout_ILayout
 };
 var feathers_layout_HorizontalLayout = function() {
 	this.verticalAlign = feathers_layout_VerticalAlign.TOP;
@@ -17045,10 +17109,10 @@ lime__$internal_backend_html5_HTML5HTTPRequest.prototype = {
 				var value = __map_reserved[key1] != null ? _this.getReserved(key1) : _this.h[key1];
 				if(key1.indexOf("[]") > -1 && ((value) instanceof Array)) {
 					var _g = [];
-					var x = $getIterator(value);
-					while(x.hasNext()) {
-						var x1 = x.next();
-						_g.push(encodeURIComponent(x1));
+					var x1 = $getIterator(value);
+					while(x1.hasNext()) {
+						var x11 = x1.next();
+						_g.push(encodeURIComponent(x11));
 					}
 					var arrayValue = _g.join("&amp;" + key1 + "=");
 					query += encodeURIComponent(key1) + "=" + arrayValue;
@@ -19833,8 +19897,8 @@ lime__$internal_graphics_ImageDataUtil.fillRect = function(image,rect,color,form
 		break;
 	case 2:
 		var bgra = color;
-		var this2 = 0;
-		var rgba1 = this2;
+		var this11 = 0;
+		var rgba1 = this11;
 		rgba1 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 		fillColor = rgba1;
 		break;
@@ -20109,20 +20173,20 @@ lime__$internal_graphics_ImageDataUtil.getColorBoundsRect = function(image,mask,
 		rgba = (argb >>> 16 & 255 & 255) << 24 | (argb >>> 8 & 255 & 255) << 16 | (argb & 255 & 255) << 8 | argb >>> 24 & 255 & 255;
 		_color = rgba;
 		var argb1 = mask;
-		var this2 = 0;
-		var rgba1 = this2;
+		var this11 = 0;
+		var rgba1 = this11;
 		rgba1 = (argb1 >>> 16 & 255 & 255) << 24 | (argb1 >>> 8 & 255 & 255) << 16 | (argb1 & 255 & 255) << 8 | argb1 >>> 24 & 255 & 255;
 		_mask = rgba1;
 		break;
 	case 2:
 		var bgra = color;
-		var this3 = 0;
-		var rgba2 = this3;
+		var this12 = 0;
+		var rgba2 = this12;
 		rgba2 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 		_color = rgba2;
 		var bgra1 = mask;
-		var this4 = 0;
-		var rgba3 = this4;
+		var this13 = 0;
+		var rgba3 = this13;
 		rgba3 = (bgra1 >>> 8 & 255 & 255) << 24 | (bgra1 >>> 16 & 255 & 255) << 16 | (bgra1 >>> 24 & 255 & 255) << 8 | bgra1 & 255 & 255;
 		_mask = rgba3;
 		break;
@@ -20293,8 +20357,8 @@ lime__$internal_graphics_ImageDataUtil.getPixel = function(image,x,y,format) {
 		argb = (pixel & 255 & 255) << 24 | (pixel >>> 24 & 255 & 255) << 16 | (pixel >>> 16 & 255 & 255) << 8 | pixel >>> 8 & 255 & 255;
 		return argb;
 	case 2:
-		var this2 = 0;
-		var bgra = this2;
+		var this11 = 0;
+		var bgra = this11;
 		bgra = (pixel >>> 8 & 255 & 255) << 24 | (pixel >>> 16 & 255 & 255) << 16 | (pixel >>> 24 & 255 & 255) << 8 | pixel & 255 & 255;
 		return bgra;
 	default:
@@ -20337,8 +20401,8 @@ lime__$internal_graphics_ImageDataUtil.getPixel32 = function(image,x,y,format) {
 		argb = (pixel & 255 & 255) << 24 | (pixel >>> 24 & 255 & 255) << 16 | (pixel >>> 16 & 255 & 255) << 8 | pixel >>> 8 & 255 & 255;
 		return argb;
 	case 2:
-		var this2 = 0;
-		var bgra = this2;
+		var this11 = 0;
+		var bgra = this11;
 		bgra = (pixel >>> 8 & 255 & 255) << 24 | (pixel >>> 16 & 255 & 255) << 16 | (pixel >>> 24 & 255 & 255) << 8 | pixel & 255 & 255;
 		return bgra;
 	default:
@@ -20403,8 +20467,8 @@ lime__$internal_graphics_ImageDataUtil.getPixels = function(image,rect,format) {
 				pixel = argb;
 				break;
 			case 2:
-				var this2 = 0;
-				var bgra1 = this2;
+				var this11 = 0;
+				var bgra1 = this11;
 				bgra1 = (pixel >>> 8 & 255 & 255) << 24 | (pixel >>> 16 & 255 & 255) << 16 | (pixel >>> 24 & 255 & 255) << 8 | pixel & 255 & 255;
 				bgra = bgra1;
 				pixel = bgra;
@@ -20865,16 +20929,16 @@ lime__$internal_graphics_ImageDataUtil.setPixel = function(image,x,y,color,forma
 		break;
 	case 2:
 		var bgra = color;
-		var this2 = 0;
-		var rgba1 = this2;
+		var this11 = 0;
+		var rgba1 = this11;
 		rgba1 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 		pixel = rgba1;
 		break;
 	default:
 		pixel = color;
 	}
-	var this3 = 0;
-	var source = this3;
+	var this12 = 0;
+	var source = this12;
 	var data = image.buffer.data;
 	var offset = 4 * (y + image.offsetY) * image.buffer.width + (x + image.offsetX) * 4;
 	var format1 = image.buffer.format;
@@ -20959,8 +21023,8 @@ lime__$internal_graphics_ImageDataUtil.setPixel32 = function(image,x,y,color,for
 		break;
 	case 2:
 		var bgra = color;
-		var this2 = 0;
-		var rgba1 = this2;
+		var this11 = 0;
+		var rgba1 = this11;
 		rgba1 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 		pixel = rgba1;
 		break;
@@ -21053,8 +21117,8 @@ lime__$internal_graphics_ImageDataUtil.setPixels = function(image,rect,bytePoint
 				break;
 			case 2:
 				var bgra = color;
-				var this2 = 0;
-				var rgba1 = this2;
+				var this11 = 0;
+				var rgba1 = this11;
 				rgba1 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 				pixel = rgba1;
 				break;
@@ -21120,30 +21184,30 @@ lime__$internal_graphics_ImageDataUtil.threshold = function(image,sourceImage,so
 		rgba = (argb >>> 16 & 255 & 255) << 24 | (argb >>> 8 & 255 & 255) << 16 | (argb & 255 & 255) << 8 | argb >>> 24 & 255 & 255;
 		_color = rgba;
 		var argb1 = mask;
-		var this2 = 0;
-		var rgba1 = this2;
+		var this11 = 0;
+		var rgba1 = this11;
 		rgba1 = (argb1 >>> 16 & 255 & 255) << 24 | (argb1 >>> 8 & 255 & 255) << 16 | (argb1 & 255 & 255) << 8 | argb1 >>> 24 & 255 & 255;
 		_mask = rgba1;
 		var argb2 = threshold;
-		var this3 = 0;
-		var rgba2 = this3;
+		var this12 = 0;
+		var rgba2 = this12;
 		rgba2 = (argb2 >>> 16 & 255 & 255) << 24 | (argb2 >>> 8 & 255 & 255) << 16 | (argb2 & 255 & 255) << 8 | argb2 >>> 24 & 255 & 255;
 		_threshold = rgba2;
 		break;
 	case 2:
 		var bgra = color;
-		var this4 = 0;
-		var rgba3 = this4;
+		var this13 = 0;
+		var rgba3 = this13;
 		rgba3 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 		_color = rgba3;
 		var bgra1 = mask;
-		var this5 = 0;
-		var rgba4 = this5;
+		var this14 = 0;
+		var rgba4 = this14;
 		rgba4 = (bgra1 >>> 8 & 255 & 255) << 24 | (bgra1 >>> 16 & 255 & 255) << 16 | (bgra1 >>> 24 & 255 & 255) << 8 | bgra1 & 255 & 255;
 		_mask = rgba4;
 		var bgra2 = threshold;
-		var this6 = 0;
-		var rgba5 = this6;
+		var this15 = 0;
+		var rgba5 = this15;
 		rgba5 = (bgra2 >>> 8 & 255 & 255) << 24 | (bgra2 >>> 16 & 255 & 255) << 16 | (bgra2 >>> 24 & 255 & 255) << 8 | bgra2 & 255 & 255;
 		_threshold = rgba5;
 		break;
@@ -24745,15 +24809,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra = color;
-					var this2 = 0;
-					var argb2 = this2;
+					var this11 = 0;
+					var argb2 = this11;
 					argb2 = (bgra & 255 & 255) << 24 | (bgra >>> 8 & 255 & 255) << 16 | (bgra >>> 16 & 255 & 255) << 8 | bgra >>> 24 & 255 & 255;
 					argb = argb2;
 					break;
 				default:
 					var rgba1 = color;
-					var this3 = 0;
-					var argb3 = this3;
+					var this12 = 0;
+					var argb3 = this12;
 					argb3 = (rgba1 & 255 & 255) << 24 | (rgba1 >>> 24 & 255 & 255) << 16 | (rgba1 >>> 16 & 255 & 255) << 8 | rgba1 >>> 8 & 255 & 255;
 					argb = argb3;
 				}
@@ -24790,15 +24854,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra = color;
-					var this2 = 0;
-					var argb2 = this2;
+					var this11 = 0;
+					var argb2 = this11;
 					argb2 = (bgra & 255 & 255) << 24 | (bgra >>> 8 & 255 & 255) << 16 | (bgra >>> 16 & 255 & 255) << 8 | bgra >>> 24 & 255 & 255;
 					argb = argb2;
 					break;
 				default:
 					var rgba1 = color;
-					var this3 = 0;
-					var argb3 = this3;
+					var this12 = 0;
+					var argb3 = this12;
 					argb3 = (rgba1 & 255 & 255) << 24 | (rgba1 >>> 24 & 255 & 255) << 16 | (rgba1 >>> 16 & 255 & 255) << 8 | rgba1 >>> 8 & 255 & 255;
 					argb = argb3;
 				}
@@ -24851,14 +24915,14 @@ lime_graphics_Image.prototype = {
 				case 1:
 					return color;
 				case 2:
-					var this2 = 0;
-					var bgra = this2;
+					var this11 = 0;
+					var bgra = this11;
 					bgra = (color & 255 & 255) << 24 | (color >>> 8 & 255 & 255) << 16 | (color >>> 16 & 255 & 255) << 8 | color >>> 24 & 255 & 255;
 					var bgra1 = bgra;
 					return bgra1;
 				default:
-					var this3 = 0;
-					var rgba2 = this3;
+					var this12 = 0;
+					var rgba2 = this12;
 					rgba2 = (color >>> 16 & 255 & 255) << 24 | (color >>> 8 & 255 & 255) << 16 | (color & 255 & 255) << 8 | color >>> 24 & 255 & 255;
 					var rgba3 = rgba2;
 					return rgba3;
@@ -24892,14 +24956,14 @@ lime_graphics_Image.prototype = {
 				case 1:
 					return color;
 				case 2:
-					var this2 = 0;
-					var bgra = this2;
+					var this11 = 0;
+					var bgra = this11;
 					bgra = (color & 255 & 255) << 24 | (color >>> 8 & 255 & 255) << 16 | (color >>> 16 & 255 & 255) << 8 | color >>> 24 & 255 & 255;
 					var bgra1 = bgra;
 					return bgra1;
 				default:
-					var this3 = 0;
-					var rgba2 = this3;
+					var this12 = 0;
+					var rgba2 = this12;
 					rgba2 = (color >>> 16 & 255 & 255) << 24 | (color >>> 8 & 255 & 255) << 16 | (color & 255 & 255) << 8 | color >>> 24 & 255 & 255;
 					var rgba3 = rgba2;
 					return rgba3;
@@ -25011,15 +25075,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra = color;
-					var this2 = 0;
-					var argb2 = this2;
+					var this11 = 0;
+					var argb2 = this11;
 					argb2 = (bgra & 255 & 255) << 24 | (bgra >>> 8 & 255 & 255) << 16 | (bgra >>> 16 & 255 & 255) << 8 | bgra >>> 24 & 255 & 255;
 					argb = argb2;
 					break;
 				default:
 					var rgba1 = color;
-					var this3 = 0;
-					var argb3 = this3;
+					var this12 = 0;
+					var argb3 = this12;
 					argb3 = (rgba1 & 255 & 255) << 24 | (rgba1 >>> 24 & 255 & 255) << 16 | (rgba1 >>> 16 & 255 & 255) << 8 | rgba1 >>> 8 & 255 & 255;
 					argb = argb3;
 				}
@@ -25056,15 +25120,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra = color;
-					var this2 = 0;
-					var argb2 = this2;
+					var this11 = 0;
+					var argb2 = this11;
 					argb2 = (bgra & 255 & 255) << 24 | (bgra >>> 8 & 255 & 255) << 16 | (bgra >>> 16 & 255 & 255) << 8 | bgra >>> 24 & 255 & 255;
 					argb = argb2;
 					break;
 				default:
 					var rgba1 = color;
-					var this3 = 0;
-					var argb3 = this3;
+					var this12 = 0;
+					var argb3 = this12;
 					argb3 = (rgba1 & 255 & 255) << 24 | (rgba1 >>> 24 & 255 & 255) << 16 | (rgba1 >>> 16 & 255 & 255) << 8 | rgba1 >>> 8 & 255 & 255;
 					argb = argb3;
 				}
@@ -25128,15 +25192,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra = color;
-					var this2 = 0;
-					var argb1 = this2;
+					var this11 = 0;
+					var argb1 = this11;
 					argb1 = (bgra & 255 & 255) << 24 | (bgra >>> 8 & 255 & 255) << 16 | (bgra >>> 16 & 255 & 255) << 8 | bgra >>> 24 & 255 & 255;
 					_color = argb1;
 					break;
 				default:
 					var rgba1 = color;
-					var this3 = 0;
-					var argb2 = this3;
+					var this12 = 0;
+					var argb2 = this12;
 					argb2 = (rgba1 & 255 & 255) << 24 | (rgba1 >>> 24 & 255 & 255) << 16 | (rgba1 >>> 16 & 255 & 255) << 8 | rgba1 >>> 8 & 255 & 255;
 					_color = argb2;
 				}
@@ -25144,8 +25208,8 @@ lime_graphics_Image.prototype = {
 			var _mask;
 			if(format == null) {
 				var rgba2 = mask;
-				var this4 = 0;
-				var argb3 = this4;
+				var this13 = 0;
+				var argb3 = this13;
 				argb3 = (rgba2 & 255 & 255) << 24 | (rgba2 >>> 24 & 255 & 255) << 16 | (rgba2 >>> 16 & 255 & 255) << 8 | rgba2 >>> 8 & 255 & 255;
 				_mask = argb3;
 			} else {
@@ -25155,15 +25219,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra1 = mask;
-					var this5 = 0;
-					var argb4 = this5;
+					var this14 = 0;
+					var argb4 = this14;
 					argb4 = (bgra1 & 255 & 255) << 24 | (bgra1 >>> 8 & 255 & 255) << 16 | (bgra1 >>> 16 & 255 & 255) << 8 | bgra1 >>> 24 & 255 & 255;
 					_mask = argb4;
 					break;
 				default:
 					var rgba3 = mask;
-					var this6 = 0;
-					var argb5 = this6;
+					var this15 = 0;
+					var argb5 = this15;
 					argb5 = (rgba3 & 255 & 255) << 24 | (rgba3 >>> 24 & 255 & 255) << 16 | (rgba3 >>> 16 & 255 & 255) << 8 | rgba3 >>> 8 & 255 & 255;
 					_mask = argb5;
 				}
@@ -32833,7 +32897,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 647548;
+	this.version = 451427;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -38863,140 +38927,140 @@ openfl__$internal_formats_agal__$AGALConverter_SamplerRegister.parse = function(
 	}
 	var b_high = 0;
 	var b_low = 15;
-	var this_high = a.high & b_high;
-	var this_low = a.low & b_low;
-	sr.f = this_low;
+	var this1_high = a.high & b_high;
+	var this1_low = a.low & b_low;
+	sr.f = this1_low;
 	var b1 = 56;
 	b1 &= 63;
 	var a1;
 	if(b1 == 0) {
-		var this4 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a1 = this4;
+		var this11 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a1 = this11;
 	} else if(b1 < 32) {
-		var this5 = new haxe__$Int64__$_$_$Int64(v.high >> b1,v.high << 32 - b1 | v.low >>> b1);
-		a1 = this5;
+		var this21 = new haxe__$Int64__$_$_$Int64(v.high >> b1,v.high << 32 - b1 | v.low >>> b1);
+		a1 = this21;
 	} else {
-		var this6 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b1 - 32);
-		a1 = this6;
+		var this31 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b1 - 32);
+		a1 = this31;
 	}
 	var b_high1 = 0;
 	var b_low1 = 15;
-	var this_high1 = a1.high & b_high1;
-	var this_low1 = a1.low & b_low1;
-	sr.m = this_low1;
+	var this1_high1 = a1.high & b_high1;
+	var this1_low1 = a1.low & b_low1;
+	sr.m = this1_low1;
 	var b2 = 52;
 	b2 &= 63;
 	var a2;
 	if(b2 == 0) {
-		var this7 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a2 = this7;
+		var this12 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a2 = this12;
 	} else if(b2 < 32) {
-		var this8 = new haxe__$Int64__$_$_$Int64(v.high >> b2,v.high << 32 - b2 | v.low >>> b2);
-		a2 = this8;
+		var this22 = new haxe__$Int64__$_$_$Int64(v.high >> b2,v.high << 32 - b2 | v.low >>> b2);
+		a2 = this22;
 	} else {
-		var this9 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b2 - 32);
-		a2 = this9;
+		var this32 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b2 - 32);
+		a2 = this32;
 	}
 	var b_high2 = 0;
 	var b_low2 = 15;
-	var this_high2 = a2.high & b_high2;
-	var this_low2 = a2.low & b_low2;
-	sr.w = this_low2;
+	var this1_high2 = a2.high & b_high2;
+	var this1_low2 = a2.low & b_low2;
+	sr.w = this1_low2;
 	var b3 = 48;
 	b3 &= 63;
 	var a3;
 	if(b3 == 0) {
-		var this10 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a3 = this10;
+		var this13 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a3 = this13;
 	} else if(b3 < 32) {
-		var this11 = new haxe__$Int64__$_$_$Int64(v.high >> b3,v.high << 32 - b3 | v.low >>> b3);
-		a3 = this11;
+		var this23 = new haxe__$Int64__$_$_$Int64(v.high >> b3,v.high << 32 - b3 | v.low >>> b3);
+		a3 = this23;
 	} else {
-		var this12 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b3 - 32);
-		a3 = this12;
+		var this33 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b3 - 32);
+		a3 = this33;
 	}
 	var b_high3 = 0;
 	var b_low3 = 15;
-	var this_high3 = a3.high & b_high3;
-	var this_low3 = a3.low & b_low3;
-	sr.s = this_low3;
+	var this1_high3 = a3.high & b_high3;
+	var this1_low3 = a3.low & b_low3;
+	sr.s = this1_low3;
 	var b4 = 44;
 	b4 &= 63;
 	var a4;
 	if(b4 == 0) {
-		var this13 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a4 = this13;
-	} else if(b4 < 32) {
-		var this14 = new haxe__$Int64__$_$_$Int64(v.high >> b4,v.high << 32 - b4 | v.low >>> b4);
+		var this14 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
 		a4 = this14;
+	} else if(b4 < 32) {
+		var this24 = new haxe__$Int64__$_$_$Int64(v.high >> b4,v.high << 32 - b4 | v.low >>> b4);
+		a4 = this24;
 	} else {
-		var this15 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b4 - 32);
-		a4 = this15;
+		var this34 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b4 - 32);
+		a4 = this34;
 	}
 	var b_high4 = 0;
 	var b_low4 = 15;
-	var this_high4 = a4.high & b_high4;
-	var this_low4 = a4.low & b_low4;
-	sr.d = this_low4;
+	var this1_high4 = a4.high & b_high4;
+	var this1_low4 = a4.low & b_low4;
+	sr.d = this1_low4;
 	var b5 = 40;
 	b5 &= 63;
 	var a5;
 	if(b5 == 0) {
-		var this16 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a5 = this16;
+		var this15 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a5 = this15;
 	} else if(b5 < 32) {
-		var this17 = new haxe__$Int64__$_$_$Int64(v.high >> b5,v.high << 32 - b5 | v.low >>> b5);
-		a5 = this17;
+		var this25 = new haxe__$Int64__$_$_$Int64(v.high >> b5,v.high << 32 - b5 | v.low >>> b5);
+		a5 = this25;
 	} else {
-		var this18 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b5 - 32);
-		a5 = this18;
+		var this35 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b5 - 32);
+		a5 = this35;
 	}
 	var b_high5 = 0;
 	var b_low5 = 15;
-	var this_high5 = a5.high & b_high5;
-	var this_low5 = a5.low & b_low5;
-	sr.t = this_low5;
+	var this1_high5 = a5.high & b_high5;
+	var this1_low5 = a5.low & b_low5;
+	sr.t = this1_low5;
 	var b6 = 32;
 	b6 &= 63;
 	var a6;
 	if(b6 == 0) {
-		var this19 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a6 = this19;
+		var this16 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a6 = this16;
 	} else if(b6 < 32) {
-		var this20 = new haxe__$Int64__$_$_$Int64(v.high >> b6,v.high << 32 - b6 | v.low >>> b6);
-		a6 = this20;
+		var this26 = new haxe__$Int64__$_$_$Int64(v.high >> b6,v.high << 32 - b6 | v.low >>> b6);
+		a6 = this26;
 	} else {
-		var this21 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b6 - 32);
-		a6 = this21;
+		var this36 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b6 - 32);
+		a6 = this36;
 	}
 	var b_high6 = 0;
 	var b_low6 = 15;
-	var this_high6 = a6.high & b_high6;
-	var this_low6 = a6.low & b_low6;
-	sr.type = this_low6;
+	var this1_high6 = a6.high & b_high6;
+	var this1_low6 = a6.low & b_low6;
+	sr.type = this1_low6;
 	var b7 = 16;
 	b7 &= 63;
 	var a7;
 	if(b7 == 0) {
-		var this22 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a7 = this22;
+		var this17 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a7 = this17;
 	} else if(b7 < 32) {
-		var this23 = new haxe__$Int64__$_$_$Int64(v.high >> b7,v.high << 32 - b7 | v.low >>> b7);
-		a7 = this23;
+		var this27 = new haxe__$Int64__$_$_$Int64(v.high >> b7,v.high << 32 - b7 | v.low >>> b7);
+		a7 = this27;
 	} else {
-		var this24 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b7 - 32);
-		a7 = this24;
+		var this37 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b7 - 32);
+		a7 = this37;
 	}
 	var b_high7 = 0;
 	var b_low7 = 255;
-	var this_high7 = a7.high & b_high7;
-	var this_low7 = a7.low & b_low7;
-	sr.b = this_low7;
+	var this1_high7 = a7.high & b_high7;
+	var this1_low7 = a7.low & b_low7;
+	sr.b = this1_low7;
 	var b_high8 = 0;
 	var b_low8 = 65535;
-	var this_high8 = v.high & b_high8;
-	var this_low8 = v.low & b_low8;
-	sr.n = this_low8;
+	var this1_high8 = v.high & b_high8;
+	var this1_low8 = v.low & b_low8;
+	sr.n = this1_low8;
 	return sr;
 };
 openfl__$internal_formats_agal__$AGALConverter_SamplerRegister.prototype = {
@@ -39081,104 +39145,104 @@ openfl__$internal_formats_agal__$AGALConverter_SourceRegister.parse = function(v
 	}
 	var b_high = 0;
 	var b_low = 1;
-	var this_high = a.high & b_high;
-	var this_low = a.low & b_low;
-	sr.d = this_low;
+	var this1_high = a.high & b_high;
+	var this1_low = a.low & b_low;
+	sr.d = this1_low;
 	var b1 = 48;
 	b1 &= 63;
 	var a1;
 	if(b1 == 0) {
-		var this4 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a1 = this4;
+		var this11 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a1 = this11;
 	} else if(b1 < 32) {
-		var this5 = new haxe__$Int64__$_$_$Int64(v.high >> b1,v.high << 32 - b1 | v.low >>> b1);
-		a1 = this5;
+		var this21 = new haxe__$Int64__$_$_$Int64(v.high >> b1,v.high << 32 - b1 | v.low >>> b1);
+		a1 = this21;
 	} else {
-		var this6 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b1 - 32);
-		a1 = this6;
+		var this31 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b1 - 32);
+		a1 = this31;
 	}
 	var b_high1 = 0;
 	var b_low1 = 3;
-	var this_high1 = a1.high & b_high1;
-	var this_low1 = a1.low & b_low1;
-	sr.q = this_low1;
+	var this1_high1 = a1.high & b_high1;
+	var this1_low1 = a1.low & b_low1;
+	sr.q = this1_low1;
 	var b2 = 40;
 	b2 &= 63;
 	var a2;
 	if(b2 == 0) {
-		var this7 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a2 = this7;
+		var this12 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a2 = this12;
 	} else if(b2 < 32) {
-		var this8 = new haxe__$Int64__$_$_$Int64(v.high >> b2,v.high << 32 - b2 | v.low >>> b2);
-		a2 = this8;
+		var this22 = new haxe__$Int64__$_$_$Int64(v.high >> b2,v.high << 32 - b2 | v.low >>> b2);
+		a2 = this22;
 	} else {
-		var this9 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b2 - 32);
-		a2 = this9;
+		var this32 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b2 - 32);
+		a2 = this32;
 	}
 	var b_high2 = 0;
 	var b_low2 = 15;
-	var this_high2 = a2.high & b_high2;
-	var this_low2 = a2.low & b_low2;
-	sr.itype = this_low2;
+	var this1_high2 = a2.high & b_high2;
+	var this1_low2 = a2.low & b_low2;
+	sr.itype = this1_low2;
 	var b3 = 32;
 	b3 &= 63;
 	var a3;
 	if(b3 == 0) {
-		var this10 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a3 = this10;
+		var this13 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a3 = this13;
 	} else if(b3 < 32) {
-		var this11 = new haxe__$Int64__$_$_$Int64(v.high >> b3,v.high << 32 - b3 | v.low >>> b3);
-		a3 = this11;
+		var this23 = new haxe__$Int64__$_$_$Int64(v.high >> b3,v.high << 32 - b3 | v.low >>> b3);
+		a3 = this23;
 	} else {
-		var this12 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b3 - 32);
-		a3 = this12;
+		var this33 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b3 - 32);
+		a3 = this33;
 	}
 	var b_high3 = 0;
 	var b_low3 = 15;
-	var this_high3 = a3.high & b_high3;
-	var this_low3 = a3.low & b_low3;
-	sr.type = this_low3;
+	var this1_high3 = a3.high & b_high3;
+	var this1_low3 = a3.low & b_low3;
+	sr.type = this1_low3;
 	var b4 = 24;
 	b4 &= 63;
 	var a4;
 	if(b4 == 0) {
-		var this13 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a4 = this13;
-	} else if(b4 < 32) {
-		var this14 = new haxe__$Int64__$_$_$Int64(v.high >> b4,v.high << 32 - b4 | v.low >>> b4);
+		var this14 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
 		a4 = this14;
+	} else if(b4 < 32) {
+		var this24 = new haxe__$Int64__$_$_$Int64(v.high >> b4,v.high << 32 - b4 | v.low >>> b4);
+		a4 = this24;
 	} else {
-		var this15 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b4 - 32);
-		a4 = this15;
+		var this34 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b4 - 32);
+		a4 = this34;
 	}
 	var b_high4 = 0;
 	var b_low4 = 255;
-	var this_high4 = a4.high & b_high4;
-	var this_low4 = a4.low & b_low4;
-	sr.s = this_low4;
+	var this1_high4 = a4.high & b_high4;
+	var this1_low4 = a4.low & b_low4;
+	sr.s = this1_low4;
 	var b5 = 16;
 	b5 &= 63;
 	var a5;
 	if(b5 == 0) {
-		var this16 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a5 = this16;
+		var this15 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a5 = this15;
 	} else if(b5 < 32) {
-		var this17 = new haxe__$Int64__$_$_$Int64(v.high >> b5,v.high << 32 - b5 | v.low >>> b5);
-		a5 = this17;
+		var this25 = new haxe__$Int64__$_$_$Int64(v.high >> b5,v.high << 32 - b5 | v.low >>> b5);
+		a5 = this25;
 	} else {
-		var this18 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b5 - 32);
-		a5 = this18;
+		var this35 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b5 - 32);
+		a5 = this35;
 	}
 	var b_high5 = 0;
 	var b_low5 = 255;
-	var this_high5 = a5.high & b_high5;
-	var this_low5 = a5.low & b_low5;
-	sr.o = this_low5;
+	var this1_high5 = a5.high & b_high5;
+	var this1_low5 = a5.low & b_low5;
+	sr.o = this1_low5;
 	var b_high6 = 0;
 	var b_low6 = 65535;
-	var this_high6 = v.high & b_high6;
-	var this_low6 = v.low & b_low6;
-	sr.n = this_low6;
+	var this1_high6 = v.high & b_high6;
+	var this1_low6 = v.low & b_low6;
+	sr.n = this1_low6;
 	sr.sourceMask = sourceMask;
 	return sr;
 };
@@ -81257,537 +81321,537 @@ openfl_utils_AGALMiniAssembler.init = function() {
 	} else {
 		_this.h["mov"] = v;
 	}
-	var this2 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this11 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v1 = new openfl_utils__$AGALMiniAssembler_OpCode("add",3,1,0);
-	var _this1 = this2;
+	var _this1 = this11;
 	if(__map_reserved["add"] != null) {
 		_this1.setReserved("add",v1);
 	} else {
 		_this1.h["add"] = v1;
 	}
-	var this3 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this12 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v2 = new openfl_utils__$AGALMiniAssembler_OpCode("sub",3,2,0);
-	var _this2 = this3;
+	var _this2 = this12;
 	if(__map_reserved["sub"] != null) {
 		_this2.setReserved("sub",v2);
 	} else {
 		_this2.h["sub"] = v2;
 	}
-	var this4 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this13 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v3 = new openfl_utils__$AGALMiniAssembler_OpCode("mul",3,3,0);
-	var _this3 = this4;
+	var _this3 = this13;
 	if(__map_reserved["mul"] != null) {
 		_this3.setReserved("mul",v3);
 	} else {
 		_this3.h["mul"] = v3;
 	}
-	var this5 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this14 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v4 = new openfl_utils__$AGALMiniAssembler_OpCode("div",3,4,0);
-	var _this4 = this5;
+	var _this4 = this14;
 	if(__map_reserved["div"] != null) {
 		_this4.setReserved("div",v4);
 	} else {
 		_this4.h["div"] = v4;
 	}
-	var this6 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this15 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v5 = new openfl_utils__$AGALMiniAssembler_OpCode("rcp",2,5,0);
-	var _this5 = this6;
+	var _this5 = this15;
 	if(__map_reserved["rcp"] != null) {
 		_this5.setReserved("rcp",v5);
 	} else {
 		_this5.h["rcp"] = v5;
 	}
-	var this7 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this16 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v6 = new openfl_utils__$AGALMiniAssembler_OpCode("min",3,6,0);
-	var _this6 = this7;
+	var _this6 = this16;
 	if(__map_reserved["min"] != null) {
 		_this6.setReserved("min",v6);
 	} else {
 		_this6.h["min"] = v6;
 	}
-	var this8 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this17 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v7 = new openfl_utils__$AGALMiniAssembler_OpCode("max",3,7,0);
-	var _this7 = this8;
+	var _this7 = this17;
 	if(__map_reserved["max"] != null) {
 		_this7.setReserved("max",v7);
 	} else {
 		_this7.h["max"] = v7;
 	}
-	var this9 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this18 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v8 = new openfl_utils__$AGALMiniAssembler_OpCode("frc",2,8,0);
-	var _this8 = this9;
+	var _this8 = this18;
 	if(__map_reserved["frc"] != null) {
 		_this8.setReserved("frc",v8);
 	} else {
 		_this8.h["frc"] = v8;
 	}
-	var this10 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this19 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v9 = new openfl_utils__$AGALMiniAssembler_OpCode("sqt",2,9,0);
-	var _this9 = this10;
+	var _this9 = this19;
 	if(__map_reserved["sqt"] != null) {
 		_this9.setReserved("sqt",v9);
 	} else {
 		_this9.h["sqt"] = v9;
 	}
-	var this11 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this110 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v10 = new openfl_utils__$AGALMiniAssembler_OpCode("rsq",2,10,0);
-	var _this10 = this11;
+	var _this10 = this110;
 	if(__map_reserved["rsq"] != null) {
 		_this10.setReserved("rsq",v10);
 	} else {
 		_this10.h["rsq"] = v10;
 	}
-	var this12 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this111 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v11 = new openfl_utils__$AGALMiniAssembler_OpCode("pow",3,11,0);
-	var _this11 = this12;
+	var _this11 = this111;
 	if(__map_reserved["pow"] != null) {
 		_this11.setReserved("pow",v11);
 	} else {
 		_this11.h["pow"] = v11;
 	}
-	var this13 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this112 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v12 = new openfl_utils__$AGALMiniAssembler_OpCode("log",2,12,0);
-	var _this12 = this13;
+	var _this12 = this112;
 	if(__map_reserved["log"] != null) {
 		_this12.setReserved("log",v12);
 	} else {
 		_this12.h["log"] = v12;
 	}
-	var this14 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this113 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v13 = new openfl_utils__$AGALMiniAssembler_OpCode("exp",2,13,0);
-	var _this13 = this14;
+	var _this13 = this113;
 	if(__map_reserved["exp"] != null) {
 		_this13.setReserved("exp",v13);
 	} else {
 		_this13.h["exp"] = v13;
 	}
-	var this15 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this114 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v14 = new openfl_utils__$AGALMiniAssembler_OpCode("nrm",2,14,0);
-	var _this14 = this15;
+	var _this14 = this114;
 	if(__map_reserved["nrm"] != null) {
 		_this14.setReserved("nrm",v14);
 	} else {
 		_this14.h["nrm"] = v14;
 	}
-	var this16 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this115 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v15 = new openfl_utils__$AGALMiniAssembler_OpCode("sin",2,15,0);
-	var _this15 = this16;
+	var _this15 = this115;
 	if(__map_reserved["sin"] != null) {
 		_this15.setReserved("sin",v15);
 	} else {
 		_this15.h["sin"] = v15;
 	}
-	var this17 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this116 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v16 = new openfl_utils__$AGALMiniAssembler_OpCode("cos",2,16,0);
-	var _this16 = this17;
+	var _this16 = this116;
 	if(__map_reserved["cos"] != null) {
 		_this16.setReserved("cos",v16);
 	} else {
 		_this16.h["cos"] = v16;
 	}
-	var this18 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this117 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v17 = new openfl_utils__$AGALMiniAssembler_OpCode("crs",3,17,0);
-	var _this17 = this18;
+	var _this17 = this117;
 	if(__map_reserved["crs"] != null) {
 		_this17.setReserved("crs",v17);
 	} else {
 		_this17.h["crs"] = v17;
 	}
-	var this19 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this118 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v18 = new openfl_utils__$AGALMiniAssembler_OpCode("dp3",3,18,0);
-	var _this18 = this19;
+	var _this18 = this118;
 	if(__map_reserved["dp3"] != null) {
 		_this18.setReserved("dp3",v18);
 	} else {
 		_this18.h["dp3"] = v18;
 	}
-	var this20 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this119 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v19 = new openfl_utils__$AGALMiniAssembler_OpCode("dp4",3,19,0);
-	var _this19 = this20;
+	var _this19 = this119;
 	if(__map_reserved["dp4"] != null) {
 		_this19.setReserved("dp4",v19);
 	} else {
 		_this19.h["dp4"] = v19;
 	}
-	var this21 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this120 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v20 = new openfl_utils__$AGALMiniAssembler_OpCode("abs",2,20,0);
-	var _this20 = this21;
+	var _this20 = this120;
 	if(__map_reserved["abs"] != null) {
 		_this20.setReserved("abs",v20);
 	} else {
 		_this20.h["abs"] = v20;
 	}
-	var this22 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this121 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v21 = new openfl_utils__$AGALMiniAssembler_OpCode("neg",2,21,0);
-	var _this21 = this22;
+	var _this21 = this121;
 	if(__map_reserved["neg"] != null) {
 		_this21.setReserved("neg",v21);
 	} else {
 		_this21.h["neg"] = v21;
 	}
-	var this23 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this122 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v22 = new openfl_utils__$AGALMiniAssembler_OpCode("sat",2,22,0);
-	var _this22 = this23;
+	var _this22 = this122;
 	if(__map_reserved["sat"] != null) {
 		_this22.setReserved("sat",v22);
 	} else {
 		_this22.h["sat"] = v22;
 	}
-	var this24 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this123 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v23 = new openfl_utils__$AGALMiniAssembler_OpCode("m33",3,23,16);
-	var _this23 = this24;
+	var _this23 = this123;
 	if(__map_reserved["m33"] != null) {
 		_this23.setReserved("m33",v23);
 	} else {
 		_this23.h["m33"] = v23;
 	}
-	var this25 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this124 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v24 = new openfl_utils__$AGALMiniAssembler_OpCode("m44",3,24,16);
-	var _this24 = this25;
+	var _this24 = this124;
 	if(__map_reserved["m44"] != null) {
 		_this24.setReserved("m44",v24);
 	} else {
 		_this24.h["m44"] = v24;
 	}
-	var this26 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this125 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v25 = new openfl_utils__$AGALMiniAssembler_OpCode("m34",3,25,16);
-	var _this25 = this26;
+	var _this25 = this125;
 	if(__map_reserved["m34"] != null) {
 		_this25.setReserved("m34",v25);
 	} else {
 		_this25.h["m34"] = v25;
 	}
-	var this27 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this126 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v26 = new openfl_utils__$AGALMiniAssembler_OpCode("ddx",2,26,288);
-	var _this26 = this27;
+	var _this26 = this126;
 	if(__map_reserved["ddx"] != null) {
 		_this26.setReserved("ddx",v26);
 	} else {
 		_this26.h["ddx"] = v26;
 	}
-	var this28 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this127 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v27 = new openfl_utils__$AGALMiniAssembler_OpCode("ddy",2,27,288);
-	var _this27 = this28;
+	var _this27 = this127;
 	if(__map_reserved["ddy"] != null) {
 		_this27.setReserved("ddy",v27);
 	} else {
 		_this27.h["ddy"] = v27;
 	}
-	var this29 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this128 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v28 = new openfl_utils__$AGALMiniAssembler_OpCode("ife",2,28,897);
-	var _this28 = this29;
+	var _this28 = this128;
 	if(__map_reserved["ife"] != null) {
 		_this28.setReserved("ife",v28);
 	} else {
 		_this28.h["ife"] = v28;
 	}
-	var this30 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this129 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v29 = new openfl_utils__$AGALMiniAssembler_OpCode("ine",2,29,897);
-	var _this29 = this30;
+	var _this29 = this129;
 	if(__map_reserved["ine"] != null) {
 		_this29.setReserved("ine",v29);
 	} else {
 		_this29.h["ine"] = v29;
 	}
-	var this31 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this130 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v30 = new openfl_utils__$AGALMiniAssembler_OpCode("ifg",2,30,897);
-	var _this30 = this31;
+	var _this30 = this130;
 	if(__map_reserved["ifg"] != null) {
 		_this30.setReserved("ifg",v30);
 	} else {
 		_this30.h["ifg"] = v30;
 	}
-	var this32 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this131 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v31 = new openfl_utils__$AGALMiniAssembler_OpCode("ifl",2,31,897);
-	var _this31 = this32;
+	var _this31 = this131;
 	if(__map_reserved["ifl"] != null) {
 		_this31.setReserved("ifl",v31);
 	} else {
 		_this31.h["ifl"] = v31;
 	}
-	var this33 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this132 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v32 = new openfl_utils__$AGALMiniAssembler_OpCode("els",0,32,1921);
-	var _this32 = this33;
+	var _this32 = this132;
 	if(__map_reserved["els"] != null) {
 		_this32.setReserved("els",v32);
 	} else {
 		_this32.h["els"] = v32;
 	}
-	var this34 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this133 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v33 = new openfl_utils__$AGALMiniAssembler_OpCode("eif",0,33,1409);
-	var _this33 = this34;
+	var _this33 = this133;
 	if(__map_reserved["eif"] != null) {
 		_this33.setReserved("eif",v33);
 	} else {
 		_this33.h["eif"] = v33;
 	}
-	var this35 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this134 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v34 = new openfl_utils__$AGALMiniAssembler_OpCode("kil",1,39,160);
-	var _this34 = this35;
+	var _this34 = this134;
 	if(__map_reserved["kil"] != null) {
 		_this34.setReserved("kil",v34);
 	} else {
 		_this34.h["kil"] = v34;
 	}
-	var this36 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this135 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v35 = new openfl_utils__$AGALMiniAssembler_OpCode("tex",3,40,40);
-	var _this35 = this36;
+	var _this35 = this135;
 	if(__map_reserved["tex"] != null) {
 		_this35.setReserved("tex",v35);
 	} else {
 		_this35.h["tex"] = v35;
 	}
-	var this37 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this136 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v36 = new openfl_utils__$AGALMiniAssembler_OpCode("sge",3,41,0);
-	var _this36 = this37;
+	var _this36 = this136;
 	if(__map_reserved["sge"] != null) {
 		_this36.setReserved("sge",v36);
 	} else {
 		_this36.h["sge"] = v36;
 	}
-	var this38 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this137 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v37 = new openfl_utils__$AGALMiniAssembler_OpCode("slt",3,42,0);
-	var _this37 = this38;
+	var _this37 = this137;
 	if(__map_reserved["slt"] != null) {
 		_this37.setReserved("slt",v37);
 	} else {
 		_this37.h["slt"] = v37;
 	}
-	var this39 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this138 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v38 = new openfl_utils__$AGALMiniAssembler_OpCode("sgn",2,43,0);
-	var _this38 = this39;
+	var _this38 = this138;
 	if(__map_reserved["sgn"] != null) {
 		_this38.setReserved("sgn",v38);
 	} else {
 		_this38.h["sgn"] = v38;
 	}
-	var this40 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this139 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v39 = new openfl_utils__$AGALMiniAssembler_OpCode("seq",3,44,0);
-	var _this39 = this40;
+	var _this39 = this139;
 	if(__map_reserved["seq"] != null) {
 		_this39.setReserved("seq",v39);
 	} else {
 		_this39.h["seq"] = v39;
 	}
-	var this41 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this140 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v40 = new openfl_utils__$AGALMiniAssembler_OpCode("sne",3,45,0);
-	var _this40 = this41;
+	var _this40 = this140;
 	if(__map_reserved["sne"] != null) {
 		_this40.setReserved("sne",v40);
 	} else {
 		_this40.h["sne"] = v40;
 	}
-	var this42 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this141 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v41 = new openfl_utils__$AGALMiniAssembler_Sampler("rgba",8,0);
-	var _this41 = this42;
+	var _this41 = this141;
 	if(__map_reserved["rgba"] != null) {
 		_this41.setReserved("rgba",v41);
 	} else {
 		_this41.h["rgba"] = v41;
 	}
-	var this43 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this142 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v42 = new openfl_utils__$AGALMiniAssembler_Sampler("compressed",8,1);
-	var _this42 = this43;
+	var _this42 = this142;
 	if(__map_reserved["compressed"] != null) {
 		_this42.setReserved("compressed",v42);
 	} else {
 		_this42.h["compressed"] = v42;
 	}
-	var this44 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this143 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v43 = new openfl_utils__$AGALMiniAssembler_Sampler("compressedalpha",8,2);
-	var _this43 = this44;
+	var _this43 = this143;
 	if(__map_reserved["compressedalpha"] != null) {
 		_this43.setReserved("compressedalpha",v43);
 	} else {
 		_this43.h["compressedalpha"] = v43;
 	}
-	var this45 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this144 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v44 = new openfl_utils__$AGALMiniAssembler_Sampler("dxt1",8,1);
-	var _this44 = this45;
+	var _this44 = this144;
 	if(__map_reserved["dxt1"] != null) {
 		_this44.setReserved("dxt1",v44);
 	} else {
 		_this44.h["dxt1"] = v44;
 	}
-	var this46 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this145 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v45 = new openfl_utils__$AGALMiniAssembler_Sampler("dxt5",8,2);
-	var _this45 = this46;
+	var _this45 = this145;
 	if(__map_reserved["dxt5"] != null) {
 		_this45.setReserved("dxt5",v45);
 	} else {
 		_this45.h["dxt5"] = v45;
 	}
-	var this47 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this146 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v46 = new openfl_utils__$AGALMiniAssembler_Sampler("video",8,3);
-	var _this46 = this47;
+	var _this46 = this146;
 	if(__map_reserved["video"] != null) {
 		_this46.setReserved("video",v46);
 	} else {
 		_this46.h["video"] = v46;
 	}
-	var this48 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this147 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v47 = new openfl_utils__$AGALMiniAssembler_Sampler("2d",12,0);
-	var _this47 = this48;
+	var _this47 = this147;
 	if(__map_reserved["2d"] != null) {
 		_this47.setReserved("2d",v47);
 	} else {
 		_this47.h["2d"] = v47;
 	}
-	var this49 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this148 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v48 = new openfl_utils__$AGALMiniAssembler_Sampler("3d",12,2);
-	var _this48 = this49;
+	var _this48 = this148;
 	if(__map_reserved["3d"] != null) {
 		_this48.setReserved("3d",v48);
 	} else {
 		_this48.h["3d"] = v48;
 	}
-	var this50 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this149 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v49 = new openfl_utils__$AGALMiniAssembler_Sampler("cube",12,1);
-	var _this49 = this50;
+	var _this49 = this149;
 	if(__map_reserved["cube"] != null) {
 		_this49.setReserved("cube",v49);
 	} else {
 		_this49.h["cube"] = v49;
 	}
-	var this51 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this150 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v50 = new openfl_utils__$AGALMiniAssembler_Sampler("mipnearest",24,1);
-	var _this50 = this51;
+	var _this50 = this150;
 	if(__map_reserved["mipnearest"] != null) {
 		_this50.setReserved("mipnearest",v50);
 	} else {
 		_this50.h["mipnearest"] = v50;
 	}
-	var this52 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this151 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v51 = new openfl_utils__$AGALMiniAssembler_Sampler("miplinear",24,2);
-	var _this51 = this52;
+	var _this51 = this151;
 	if(__map_reserved["miplinear"] != null) {
 		_this51.setReserved("miplinear",v51);
 	} else {
 		_this51.h["miplinear"] = v51;
 	}
-	var this53 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this152 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v52 = new openfl_utils__$AGALMiniAssembler_Sampler("mipnone",24,0);
-	var _this52 = this53;
+	var _this52 = this152;
 	if(__map_reserved["mipnone"] != null) {
 		_this52.setReserved("mipnone",v52);
 	} else {
 		_this52.h["mipnone"] = v52;
 	}
-	var this54 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this153 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v53 = new openfl_utils__$AGALMiniAssembler_Sampler("nomip",24,0);
-	var _this53 = this54;
+	var _this53 = this153;
 	if(__map_reserved["nomip"] != null) {
 		_this53.setReserved("nomip",v53);
 	} else {
 		_this53.h["nomip"] = v53;
 	}
-	var this55 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this154 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v54 = new openfl_utils__$AGALMiniAssembler_Sampler("nearest",28,0);
-	var _this54 = this55;
+	var _this54 = this154;
 	if(__map_reserved["nearest"] != null) {
 		_this54.setReserved("nearest",v54);
 	} else {
 		_this54.h["nearest"] = v54;
 	}
-	var this56 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this155 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v55 = new openfl_utils__$AGALMiniAssembler_Sampler("linear",28,1);
-	var _this55 = this56;
+	var _this55 = this155;
 	if(__map_reserved["linear"] != null) {
 		_this55.setReserved("linear",v55);
 	} else {
 		_this55.h["linear"] = v55;
 	}
-	var this57 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this156 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v56 = new openfl_utils__$AGALMiniAssembler_Sampler("anisotropic2x",28,2);
-	var _this56 = this57;
+	var _this56 = this156;
 	if(__map_reserved["anisotropic2x"] != null) {
 		_this56.setReserved("anisotropic2x",v56);
 	} else {
 		_this56.h["anisotropic2x"] = v56;
 	}
-	var this58 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this157 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v57 = new openfl_utils__$AGALMiniAssembler_Sampler("anisotropic4x",28,3);
-	var _this57 = this58;
+	var _this57 = this157;
 	if(__map_reserved["anisotropic4x"] != null) {
 		_this57.setReserved("anisotropic4x",v57);
 	} else {
 		_this57.h["anisotropic4x"] = v57;
 	}
-	var this59 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this158 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v58 = new openfl_utils__$AGALMiniAssembler_Sampler("anisotropic8x",28,4);
-	var _this58 = this59;
+	var _this58 = this158;
 	if(__map_reserved["anisotropic8x"] != null) {
 		_this58.setReserved("anisotropic8x",v58);
 	} else {
 		_this58.h["anisotropic8x"] = v58;
 	}
-	var this60 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this159 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v59 = new openfl_utils__$AGALMiniAssembler_Sampler("anisotropic16x",28,5);
-	var _this59 = this60;
+	var _this59 = this159;
 	if(__map_reserved["anisotropic16x"] != null) {
 		_this59.setReserved("anisotropic16x",v59);
 	} else {
 		_this59.h["anisotropic16x"] = v59;
 	}
-	var this61 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this160 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v60 = new openfl_utils__$AGALMiniAssembler_Sampler("centroid",16,1);
-	var _this60 = this61;
+	var _this60 = this160;
 	if(__map_reserved["centroid"] != null) {
 		_this60.setReserved("centroid",v60);
 	} else {
 		_this60.h["centroid"] = v60;
 	}
-	var this62 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this161 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v61 = new openfl_utils__$AGALMiniAssembler_Sampler("single",16,2);
-	var _this61 = this62;
+	var _this61 = this161;
 	if(__map_reserved["single"] != null) {
 		_this61.setReserved("single",v61);
 	} else {
 		_this61.h["single"] = v61;
 	}
-	var this63 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this162 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v62 = new openfl_utils__$AGALMiniAssembler_Sampler("ignoresampler",16,4);
-	var _this62 = this63;
+	var _this62 = this162;
 	if(__map_reserved["ignoresampler"] != null) {
 		_this62.setReserved("ignoresampler",v62);
 	} else {
 		_this62.h["ignoresampler"] = v62;
 	}
-	var this64 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this163 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v63 = new openfl_utils__$AGALMiniAssembler_Sampler("repeat",20,1);
-	var _this63 = this64;
+	var _this63 = this163;
 	if(__map_reserved["repeat"] != null) {
 		_this63.setReserved("repeat",v63);
 	} else {
 		_this63.h["repeat"] = v63;
 	}
-	var this65 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this164 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v64 = new openfl_utils__$AGALMiniAssembler_Sampler("wrap",20,1);
-	var _this64 = this65;
+	var _this64 = this164;
 	if(__map_reserved["wrap"] != null) {
 		_this64.setReserved("wrap",v64);
 	} else {
 		_this64.h["wrap"] = v64;
 	}
-	var this66 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this165 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v65 = new openfl_utils__$AGALMiniAssembler_Sampler("clamp",20,0);
-	var _this65 = this66;
+	var _this65 = this165;
 	if(__map_reserved["clamp"] != null) {
 		_this65.setReserved("clamp",v65);
 	} else {
 		_this65.h["clamp"] = v65;
 	}
-	var this67 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this166 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v66 = new openfl_utils__$AGALMiniAssembler_Sampler("clamp_u_repeat_v",20,2);
-	var _this66 = this67;
+	var _this66 = this166;
 	if(__map_reserved["clamp_u_repeat_v"] != null) {
 		_this66.setReserved("clamp_u_repeat_v",v66);
 	} else {
 		_this66.h["clamp_u_repeat_v"] = v66;
 	}
-	var this68 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this167 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v67 = new openfl_utils__$AGALMiniAssembler_Sampler("repeat_u_clamp_v",20,3);
-	var _this67 = this68;
+	var _this67 = this167;
 	if(__map_reserved["repeat_u_clamp_v"] != null) {
 		_this67.setReserved("repeat_u_clamp_v",v67);
 	} else {
@@ -81963,8 +82027,8 @@ openfl_utils_AGALMiniAssembler.prototype = {
 					regidx = Std.parseInt(idxmatch[0]);
 				}
 				if(_$UInt_UInt_$Impl_$.gt(regidx,regFound.range)) {
-					var this2 = regFound.range + 1;
-					this.error = "error: register operand " + j + " (" + regs[j] + ") index exceeds limit of " + Std.string(this2 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this2)) + ".";
+					var this11 = regFound.range + 1;
+					this.error = "error: register operand " + j + " (" + regs[j] + ") index exceeds limit of " + Std.string(this11 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this11)) + ".";
 					badreg = true;
 					break;
 				}
@@ -82149,135 +82213,135 @@ openfl_utils_AGALMiniAssembler.prototype = {
 		} else {
 			_this.h["va"] = v;
 		}
-		var this2 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this11 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v1 = new openfl_utils__$AGALMiniAssembler_Register("vc","vertex constant",1,ignorelimits ? 1024 : version == 1 ? 127 : 249,66);
-		var _this1 = this2;
+		var _this1 = this11;
 		if(__map_reserved["vc"] != null) {
 			_this1.setReserved("vc",v1);
 		} else {
 			_this1.h["vc"] = v1;
 		}
-		var this3 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this12 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v2 = new openfl_utils__$AGALMiniAssembler_Register("vt","vertex temporary",2,ignorelimits ? 1024 : version == 1 ? 7 : 25,67);
-		var _this2 = this3;
+		var _this2 = this12;
 		if(__map_reserved["vt"] != null) {
 			_this2.setReserved("vt",v2);
 		} else {
 			_this2.h["vt"] = v2;
 		}
-		var this4 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this13 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v3 = new openfl_utils__$AGALMiniAssembler_Register("vo","vertex output",3,ignorelimits ? 1024 : 0,65);
-		var _this3 = this4;
+		var _this3 = this13;
 		if(__map_reserved["vo"] != null) {
 			_this3.setReserved("vo",v3);
 		} else {
 			_this3.h["vo"] = v3;
 		}
-		var this5 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this14 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v4 = new openfl_utils__$AGALMiniAssembler_Register("vi","varying",4,ignorelimits ? 1024 : version == 1 ? 7 : 9,99);
-		var _this4 = this5;
+		var _this4 = this14;
 		if(__map_reserved["vi"] != null) {
 			_this4.setReserved("vi",v4);
 		} else {
 			_this4.h["vi"] = v4;
 		}
-		var this6 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this15 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v5 = new openfl_utils__$AGALMiniAssembler_Register("fc","fragment constant",1,ignorelimits ? 1024 : version == 1 ? 27 : version == 2 ? 63 : 199,34);
-		var _this5 = this6;
+		var _this5 = this15;
 		if(__map_reserved["fc"] != null) {
 			_this5.setReserved("fc",v5);
 		} else {
 			_this5.h["fc"] = v5;
 		}
-		var this7 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this16 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v6 = new openfl_utils__$AGALMiniAssembler_Register("ft","fragment temporary",2,ignorelimits ? 1024 : version == 1 ? 7 : 25,35);
-		var _this6 = this7;
+		var _this6 = this16;
 		if(__map_reserved["ft"] != null) {
 			_this6.setReserved("ft",v6);
 		} else {
 			_this6.h["ft"] = v6;
 		}
-		var this8 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this17 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v7 = new openfl_utils__$AGALMiniAssembler_Register("fs","texture sampler",5,ignorelimits ? 1024 : 7,34);
-		var _this7 = this8;
+		var _this7 = this17;
 		if(__map_reserved["fs"] != null) {
 			_this7.setReserved("fs",v7);
 		} else {
 			_this7.h["fs"] = v7;
 		}
-		var this9 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this18 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v8 = new openfl_utils__$AGALMiniAssembler_Register("fo","fragment output",3,ignorelimits ? 1024 : version == 1 ? 0 : 3,33);
-		var _this8 = this9;
+		var _this8 = this18;
 		if(__map_reserved["fo"] != null) {
 			_this8.setReserved("fo",v8);
 		} else {
 			_this8.h["fo"] = v8;
 		}
-		var this10 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this19 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v9 = new openfl_utils__$AGALMiniAssembler_Register("fd","fragment depth output",6,ignorelimits ? 1024 : version == 1 ? -1 : 0,33);
-		var _this9 = this10;
+		var _this9 = this19;
 		if(__map_reserved["fd"] != null) {
 			_this9.setReserved("fd",v9);
 		} else {
 			_this9.h["fd"] = v9;
 		}
-		var this11 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this110 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v10 = new openfl_utils__$AGALMiniAssembler_Register("iid","instance id",7,ignorelimits ? 1024 : 0,66);
-		var _this10 = this11;
+		var _this10 = this110;
 		if(__map_reserved["iid"] != null) {
 			_this10.setReserved("iid",v10);
 		} else {
 			_this10.h["iid"] = v10;
 		}
-		var this12 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this111 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this11 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v11 = __map_reserved["vo"] != null ? _this11.getReserved("vo") : _this11.h["vo"];
-		var _this12 = this12;
+		var _this12 = this111;
 		if(__map_reserved["op"] != null) {
 			_this12.setReserved("op",v11);
 		} else {
 			_this12.h["op"] = v11;
 		}
-		var this13 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this112 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this13 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v12 = __map_reserved["vi"] != null ? _this13.getReserved("vi") : _this13.h["vi"];
-		var _this14 = this13;
+		var _this14 = this112;
 		if(__map_reserved["i"] != null) {
 			_this14.setReserved("i",v12);
 		} else {
 			_this14.h["i"] = v12;
 		}
-		var this14 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this113 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this15 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v13 = __map_reserved["vi"] != null ? _this15.getReserved("vi") : _this15.h["vi"];
-		var _this16 = this14;
+		var _this16 = this113;
 		if(__map_reserved["v"] != null) {
 			_this16.setReserved("v",v13);
 		} else {
 			_this16.h["v"] = v13;
 		}
-		var this15 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this114 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this17 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v14 = __map_reserved["fo"] != null ? _this17.getReserved("fo") : _this17.h["fo"];
-		var _this18 = this15;
+		var _this18 = this114;
 		if(__map_reserved["oc"] != null) {
 			_this18.setReserved("oc",v14);
 		} else {
 			_this18.h["oc"] = v14;
 		}
-		var this16 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this115 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this19 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v15 = __map_reserved["fd"] != null ? _this19.getReserved("fd") : _this19.h["fd"];
-		var _this20 = this16;
+		var _this20 = this115;
 		if(__map_reserved["od"] != null) {
 			_this20.setReserved("od",v15);
 		} else {
 			_this20.h["od"] = v15;
 		}
-		var this17 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this116 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this21 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v16 = __map_reserved["vi"] != null ? _this21.getReserved("vi") : _this21.h["vi"];
-		var _this22 = this17;
+		var _this22 = this116;
 		if(__map_reserved["fi"] != null) {
 			_this22.setReserved("fi",v16);
 		} else {
@@ -82333,10 +82397,10 @@ openfl_utils__$AGALMiniAssembler_Register.prototype = {
 	,toString: function() {
 		var this1 = this.emitCode;
 		var tmp = "[Register name=\"" + this.name + "\", longName=\"" + this.longName + "\", emitCode=" + Std.string(this1 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this1)) + ", range=";
-		var this2 = this.range;
-		var tmp1 = tmp + Std.string(this2 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this2)) + ", flags=";
-		var this3 = this.flags;
-		return tmp1 + Std.string(this3 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this3)) + "]";
+		var this11 = this.range;
+		var tmp1 = tmp + Std.string(this11 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this11)) + ", flags=";
+		var this12 = this.flags;
+		return tmp1 + Std.string(this12 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this12)) + "]";
 	}
 	,__class__: openfl_utils__$AGALMiniAssembler_Register
 };
@@ -82354,8 +82418,8 @@ openfl_utils__$AGALMiniAssembler_Sampler.prototype = {
 	,toString: function() {
 		var this1 = this.flag;
 		var tmp = "[Sampler name=\"" + this.name + "\", flag=\"" + Std.string(this1 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this1)) + "\", mask=";
-		var this2 = this.mask;
-		return tmp + Std.string(this2 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this2)) + "]";
+		var this11 = this.mask;
+		return tmp + Std.string(this11 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this11)) + "]";
 	}
 	,__class__: openfl_utils__$AGALMiniAssembler_Sampler
 };
@@ -83235,7 +83299,7 @@ openfl_utils_ByteArrayData.unwrapAMF3Value = function(val) {
 		}
 		return obj;
 	case 8:
-		var _g11 = val.extra;
+		var _g9 = val.extra;
 		var vals = val.values;
 		var f1 = openfl_utils_ByteArrayData.unwrapAMF3Value;
 		var result = new Array(vals.length);
@@ -83250,12 +83314,12 @@ openfl_utils_ByteArrayData.unwrapAMF3Value = function(val) {
 		var vals1 = val.values;
 		var f2 = openfl_utils_ByteArrayData.unwrapAMF3Value;
 		var length = vals1.length;
-		var this1 = new Array(length);
-		var r = this1;
+		var this2 = new Array(length);
+		var r = this2;
 		var len = length;
 		var _g2 = 0;
-		var _g12 = len;
-		while(_g2 < _g12) {
+		var _g11 = len;
+		while(_g2 < _g11) {
 			var i1 = _g2++;
 			var v = f2(vals1[i1]);
 			r[i1] = v;
@@ -83276,7 +83340,7 @@ openfl_utils_ByteArrayData.unwrapAMF3Value = function(val) {
 			if(map == null) {
 				switch(key1._hx_index) {
 				case 3:
-					var _g13 = key1.i;
+					var _g12 = key1.i;
 					map = new haxe_ds_IntMap();
 					break;
 				case 5:
