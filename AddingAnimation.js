@@ -4799,13 +4799,36 @@ hacksaw_Scene.prototype = $extend(openfl_display_Sprite.prototype,{
 	,__class__: hacksaw_Scene
 });
 var GameScene = function() {
+	this.interactable = true;
+	this.soundFinish = openfl_utils_Assets.getSound("assets/sounds/kids_cheering.mp3");
 	hacksaw_Scene.call(this);
 };
 $hxClasses["GameScene"] = GameScene;
 GameScene.__name__ = "GameScene";
 GameScene.__super__ = hacksaw_Scene;
 GameScene.prototype = $extend(hacksaw_Scene.prototype,{
-	addExitButton: function() {
+	soundFinish: null
+	,particleSystem: null
+	,interactable: null
+	,onEnter: function(previous) {
+	}
+	,finishWithSuccess: function() {
+		this.soundFinish.play();
+		this.particleSystem.emit(openfl_Lib.get_current().stage.stageWidth / 2,openfl_Lib.get_current().stage.stageHeight / 2);
+		haxe_Timer.delay($bind(this,this.onFinishWithSuccess),2000);
+	}
+	,onFinishWithSuccess: function() {
+		this.particleSystem.stop();
+		this.removeChildren();
+		hacksaw_SceneManager.restart();
+	}
+	,initParticles: function() {
+		var renderer = org_zamedev_particles_renderers_DefaultParticleRenderer.createInstance();
+		this.addChild(renderer);
+		this.particleSystem = org_zamedev_particles_loaders_ParticleLoader.load("assets/particles/trippy.plist");
+		renderer.addParticleSystem(this.particleSystem);
+	}
+	,addExitButton: function() {
 		var format = new openfl_text_TextFormat();
 		format.align = 3;
 		format.size = 100;
@@ -4822,12 +4845,32 @@ GameScene.prototype = $extend(hacksaw_Scene.prototype,{
 	,closeGame: function(e) {
 		hacksaw_SceneManager.pop();
 	}
+	,playSoundsInSequence: function(sounds,callback,stopInteracting) {
+		if(stopInteracting == null) {
+			stopInteracting = true;
+		}
+		var _gthis = this;
+		if(sounds.length == 0) {
+			this.interactable = true;
+			if(callback != null) {
+				callback();
+			}
+			return;
+		}
+		if(stopInteracting) {
+			this.interactable = false;
+		}
+		var sound = sounds[0];
+		var channel = sound.play();
+		channel.addEventListener("soundComplete",function(e) {
+			var tmp = sounds.slice(1);
+			_gthis.playSoundsInSequence(tmp,callback,stopInteracting);
+		});
+	}
 	,__class__: GameScene
 });
 var GameBalloon = function() {
-	this.interactable = true;
 	this.balloons = new haxe_ds_IntMap();
-	this.soundFinish = openfl_utils_Assets.getSound("assets/sounds/kids_cheering.mp3");
 	this.soundWhere = openfl_utils_Assets.getSound("assets/sounds/where.wav");
 	this.currentNumber = 1;
 	GameScene.call(this);
@@ -4839,10 +4882,7 @@ GameBalloon.__super__ = GameScene;
 GameBalloon.prototype = $extend(GameScene.prototype,{
 	currentNumber: null
 	,soundWhere: null
-	,soundFinish: null
 	,balloons: null
-	,particleSystem: null
-	,interactable: null
 	,clickNumber: function(e) {
 		if(!this.interactable) {
 			return;
@@ -4861,44 +4901,26 @@ GameBalloon.prototype = $extend(GameScene.prototype,{
 		}
 	}
 	,onMatchEnd: function() {
-		this.soundFinish.play();
-		this.particleSystem.emit(openfl_Lib.get_current().stage.stageWidth / 2,openfl_Lib.get_current().stage.stageHeight / 2);
-		haxe_Timer.delay($bind(this,this.reset),2000);
+		this.finishWithSuccess();
 	}
 	,startNumber: function() {
-		var _gthis = this;
-		this.interactable = false;
 		var b = this.currentBalloon();
 		if(b != null) {
-			var channel = this.soundWhere.play();
-			channel.addEventListener("soundComplete",function(e) {
-				b.sayNumber();
-				haxe_Timer.delay(function() {
-					_gthis.interactable = true;
-				},500);
-			});
+			this.playSoundsInSequence([this.soundWhere,b.sound]);
 		}
 	}
 	,currentBalloon: function() {
 		return this.balloons.h[this.currentNumber];
 	}
 	,onEnter: function(previous) {
-		this.reset();
-	}
-	,reset: function() {
+		GameScene.prototype.onEnter.call(this,previous);
 		this.currentNumber = 1;
 		this.balloons.h = { };
 		this.removeChildren();
-		this.initParticles();
 		this.createBalloons();
 		this.addExitButton();
+		this.initParticles();
 		this.startNumber();
-	}
-	,initParticles: function() {
-		var renderer = org_zamedev_particles_renderers_DefaultParticleRenderer.createInstance();
-		this.addChild(renderer);
-		this.particleSystem = org_zamedev_particles_loaders_ParticleLoader.load("assets/particles/trippy.plist");
-		renderer.addParticleSystem(this.particleSystem);
 	}
 	,createBalloons: function() {
 		var i = 9;
@@ -4927,23 +4949,18 @@ GameLamp.prototype = $extend(GameScene.prototype,{
 	currentNumber: null
 	,soundWhere: null
 	,onEnter: function(previous) {
-		this.reset();
-	}
-	,onExit: function(next) {
-	}
-	,reset: function() {
+		GameScene.prototype.onEnter.call(this,previous);
 		this.removeChildren();
 		this.currentNumber = Std.random(9) + 1;
 		this.createBalloons();
 		this.addExitButton();
+		this.initParticles();
 		this.startNumber();
 	}
+	,onExit: function(next) {
+	}
 	,startNumber: function() {
-		var _gthis = this;
-		var channel = this.soundWhere.play();
-		channel.addEventListener("soundComplete",function(e) {
-			new Balloon("" + _gthis.currentNumber).sayNumber();
-		});
+		this.playSoundsInSequence([this.soundWhere,new Balloon("" + this.currentNumber).sound]);
 	}
 	,createBalloons: function() {
 		var x = 0;
@@ -4977,7 +4994,7 @@ GameLamp.prototype = $extend(GameScene.prototype,{
 		var balloon = Balloon.getClickedBalloon(e);
 		balloon.pop();
 		if(this.finished()) {
-			haxe_Timer.delay($bind(this,this.reset),1000);
+			this.finishWithSuccess();
 		}
 	}
 	,finished: function() {
@@ -4994,6 +5011,7 @@ GameLamp.prototype = $extend(GameScene.prototype,{
 				}
 			}
 		}
+		this.finishWithSuccess();
 		return true;
 	}
 	,__class__: GameLamp
@@ -5062,31 +5080,29 @@ GameZoombini.prototype = $extend(GameScene.prototype,{
 	,chosenShape: null
 	,onEnter: function(previous) {
 		this.createShapes();
+		this.addExitButton();
+		this.initParticles();
 		this.askForShape();
 	}
 	,askForShape: function() {
 		this.soundGiveme.play();
 	}
 	,clickShape: function(e) {
-		var _gthis = this;
+		if(!this.interactable) {
+			return;
+		}
 		var shape = e.target;
 		this.removeChild(shape);
 		if(shape == this.chosenShape) {
-			var channel = this.soundLike.play();
-			channel.addEventListener("soundComplete",function(e1) {
-				haxe_Timer.delay(function() {
-					hacksaw_SceneManager.restart();
-				},1000);
-			});
+			this.playSoundsInSequence([this.soundLike],$bind(this,this.finishWithSuccess));
 		} else {
-			var channel1 = this.soundDontLike.play();
-			channel1.addEventListener("soundComplete",function(e2) {
-				if(shape.shapeName == _gthis.chosenShape.shapeName) {
-					shape.sayColor();
-				} else {
-					shape.sayShape();
-				}
-			});
+			var sounds = [this.soundDontLike];
+			if(shape.shapeName == this.chosenShape.shapeName) {
+				sounds.push(shape.soundColor);
+			} else {
+				sounds.push(shape.soundShape);
+			}
+			this.playSoundsInSequence(sounds);
 		}
 	}
 	,createShapes: function() {
