@@ -894,9 +894,9 @@ ApplicationMain.create = function(config) {
 	ManifestResources.init(config);
 	var _this = app.meta;
 	if(__map_reserved["build"] != null) {
-		_this.setReserved("build","20");
+		_this.setReserved("build","21");
 	} else {
-		_this.h["build"] = "20";
+		_this.h["build"] = "21";
 	}
 	var _this1 = app.meta;
 	if(__map_reserved["company"] != null) {
@@ -7281,6 +7281,7 @@ GameScene.prototype = $extend(hacksaw_Scene.prototype,{
 	,__class__: GameScene
 });
 var GameBalloon = function() {
+	this.config = openfl_net_SharedObject.getLocal("GameBalloon");
 	this.balloons = new haxe_ds_IntMap();
 	this.soundWhere = openfl_utils_Assets.getSound("assets/sounds/where.wav");
 	this.currentNumber = 1;
@@ -7295,6 +7296,7 @@ GameBalloon.prototype = $extend(GameScene.prototype,{
 	,soundWhere: null
 	,balloons: null
 	,balloonGroup: null
+	,config: null
 	,clickNumber: function(e) {
 		if(!this.interactable) {
 			return;
@@ -7303,7 +7305,7 @@ GameBalloon.prototype = $extend(GameScene.prototype,{
 		if(balloon.get_number() == this.currentNumber) {
 			balloon.pop();
 			this.currentNumber++;
-			if(this.currentNumber > GameBalloon.MAX_NUMBER) {
+			if(this.currentNumber > this.config.data.maxNumber) {
 				this.onMatchEnd();
 			} else {
 				haxe_Timer.delay($bind(this,this.startNumber),800);
@@ -7326,7 +7328,13 @@ GameBalloon.prototype = $extend(GameScene.prototype,{
 	}
 	,onEnter: function(previous) {
 		GameScene.prototype.onEnter.call(this,previous);
-		this.currentNumber = GameBalloon.MIN_NUMBER;
+		if(this.config.data.minNumber == null) {
+			this.config.data.minNumber = 1;
+		}
+		if(this.config.data.maxNumber == null) {
+			this.config.data.maxNumber = 10;
+		}
+		this.currentNumber = this.config.data.minNumber;
 		this.balloons.h = { };
 		this.removeChildren();
 		this.createBalloons();
@@ -7340,8 +7348,8 @@ GameBalloon.prototype = $extend(GameScene.prototype,{
 		layout.avoidCollision = true;
 		this.balloonGroup.set_layout(layout);
 		this.addChild(this.balloonGroup);
-		var i = GameBalloon.MAX_NUMBER;
-		while(i >= GameBalloon.MIN_NUMBER) {
+		var i = this.config.data.maxNumber;
+		while(i >= this.config.data.minNumber) {
 			var balloon = new Balloon("" + i);
 			balloon.addEventListener("click",$bind(this,this.clickNumber));
 			this.balloonGroup.addChild(balloon);
@@ -7351,6 +7359,908 @@ GameBalloon.prototype = $extend(GameScene.prototype,{
 	}
 	,__class__: GameBalloon
 });
+var openfl_net_SharedObject = function() {
+	openfl_events_EventDispatcher.call(this);
+	this.client = this;
+	this.objectEncoding = openfl_net_SharedObject.defaultObjectEncoding;
+};
+$hxClasses["openfl.net.SharedObject"] = openfl_net_SharedObject;
+openfl_net_SharedObject.__name__ = "openfl.net.SharedObject";
+openfl_net_SharedObject.getLocal = function(name,localPath,secure) {
+	if(secure == null) {
+		secure = false;
+	}
+	var illegalValues = [" ","~","%","&","\\",";",":","\"","'",",","<",">","?","#"];
+	var allowed = true;
+	if(name == null || name == "") {
+		allowed = false;
+	} else {
+		var _g = 0;
+		while(_g < illegalValues.length) {
+			var value = illegalValues[_g];
+			++_g;
+			if(name.indexOf(value) > -1) {
+				allowed = false;
+				break;
+			}
+		}
+	}
+	if(!allowed) {
+		throw new js__$Boot_HaxeError(new openfl_errors_Error("Error #2134: Cannot create SharedObject."));
+	}
+	if(openfl_net_SharedObject.__sharedObjects == null) {
+		openfl_net_SharedObject.__sharedObjects = new haxe_ds_StringMap();
+		if(lime_app_Application.current != null) {
+			lime_app_Application.current.onExit.add(openfl_net_SharedObject.application_onExit);
+		}
+	}
+	var id = localPath + "/" + name;
+	var _this = openfl_net_SharedObject.__sharedObjects;
+	if(!(__map_reserved[id] != null ? _this.existsReserved(id) : _this.h.hasOwnProperty(id))) {
+		var encodedData = null;
+		try {
+			var storage = js_Browser.getLocalStorage();
+			if(localPath == null) {
+				if(storage != null) {
+					encodedData = storage.getItem(window.location.href + ":" + name);
+					storage.removeItem(window.location.href + ":" + name);
+				}
+				localPath = window.location.pathname;
+			}
+			if(storage != null && encodedData == null) {
+				encodedData = storage.getItem(localPath + ":" + name);
+			}
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
+		}
+		var sharedObject = new openfl_net_SharedObject();
+		sharedObject.data = { };
+		sharedObject.__localPath = localPath;
+		sharedObject.__name = name;
+		if(encodedData != null && encodedData != "") {
+			try {
+				var unserializer = new haxe_Unserializer(encodedData);
+				unserializer.setResolver({ resolveEnum : Type.resolveEnum, resolveClass : openfl_net_SharedObject.__resolveClass});
+				sharedObject.data = unserializer.unserialize();
+			} catch( e2 ) {
+				haxe_CallStack.lastException = e2;
+				var e3 = ((e2) instanceof js__$Boot_HaxeError) ? e2.val : e2;
+			}
+		}
+		var _this1 = openfl_net_SharedObject.__sharedObjects;
+		if(__map_reserved[id] != null) {
+			_this1.setReserved(id,sharedObject);
+		} else {
+			_this1.h[id] = sharedObject;
+		}
+	}
+	var _this2 = openfl_net_SharedObject.__sharedObjects;
+	if(__map_reserved[id] != null) {
+		return _this2.getReserved(id);
+	} else {
+		return _this2.h[id];
+	}
+};
+openfl_net_SharedObject.getRemote = function(name,remotePath,persistence,secure) {
+	if(secure == null) {
+		secure = false;
+	}
+	if(persistence == null) {
+		persistence = false;
+	}
+	openfl__$internal_Lib.notImplemented({ fileName : "openfl/net/SharedObject.hx", lineNumber : 808, className : "openfl.net.SharedObject", methodName : "getRemote"});
+	return null;
+};
+openfl_net_SharedObject.__getPath = function(localPath,name) {
+	var path = lime_system_System.get_applicationStorageDirectory() + "/" + localPath + "/";
+	name = StringTools.replace(name,"//","/");
+	name = StringTools.replace(name,"//","/");
+	if(StringTools.startsWith(name,"/")) {
+		name = HxOverrides.substr(name,1,null);
+	}
+	if(StringTools.endsWith(name,"/")) {
+		name = name.substring(0,name.length - 1);
+	}
+	if(name.indexOf("/") > -1) {
+		var split = name.split("/");
+		name = "";
+		var _g = 0;
+		var _g1 = split.length - 1;
+		while(_g < _g1) {
+			var i = _g++;
+			name += "#" + split[i] + "/";
+		}
+		name += split[split.length - 1];
+	}
+	return path + name + ".sol";
+};
+openfl_net_SharedObject.__mkdir = function(directory) {
+};
+openfl_net_SharedObject.__resolveClass = function(name) {
+	if(name != null) {
+		if(StringTools.startsWith(name,"neash.")) {
+			name = StringTools.replace(name,"neash.","openfl.");
+		}
+		if(StringTools.startsWith(name,"native.")) {
+			name = StringTools.replace(name,"native.","openfl.");
+		}
+		if(StringTools.startsWith(name,"flash.")) {
+			name = StringTools.replace(name,"flash.","openfl.");
+		}
+		if(StringTools.startsWith(name,"openfl._v2.")) {
+			name = StringTools.replace(name,"openfl._v2.","openfl.");
+		}
+		if(StringTools.startsWith(name,"openfl._legacy.")) {
+			name = StringTools.replace(name,"openfl._legacy.","openfl.");
+		}
+		return $hxClasses[name];
+	}
+	return null;
+};
+openfl_net_SharedObject.application_onExit = function(_) {
+	var _this = openfl_net_SharedObject.__sharedObjects;
+	var sharedObject = new haxe_ds__$StringMap_StringMapIterator(_this,_this.arrayKeys());
+	while(sharedObject.hasNext()) {
+		var sharedObject1 = sharedObject.next();
+		sharedObject1.flush();
+	}
+};
+openfl_net_SharedObject.__super__ = openfl_events_EventDispatcher;
+openfl_net_SharedObject.prototype = $extend(openfl_events_EventDispatcher.prototype,{
+	client: null
+	,data: null
+	,fps: null
+	,objectEncoding: null
+	,__localPath: null
+	,__name: null
+	,clear: function() {
+		this.data = { };
+		try {
+			var storage = js_Browser.getLocalStorage();
+			if(storage != null) {
+				storage.removeItem(this.__localPath + ":" + this.__name);
+			}
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
+		}
+	}
+	,close: function() {
+	}
+	,connect: function(myConnection,params) {
+		openfl__$internal_Lib.notImplemented({ fileName : "openfl/net/SharedObject.hx", lineNumber : 392, className : "openfl.net.SharedObject", methodName : "connect"});
+	}
+	,flush: function(minDiskSpace) {
+		if(minDiskSpace == null) {
+			minDiskSpace = 0;
+		}
+		if(Reflect.fields(this.data).length == 0) {
+			return 0;
+		}
+		var encodedData = haxe_Serializer.run(this.data);
+		try {
+			var storage = js_Browser.getLocalStorage();
+			if(storage != null) {
+				storage.removeItem(this.__localPath + ":" + this.__name);
+				storage.setItem(this.__localPath + ":" + this.__name,encodedData);
+			}
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
+			return 1;
+		}
+		return 0;
+	}
+	,send: function(args) {
+		openfl__$internal_Lib.notImplemented({ fileName : "openfl/net/SharedObject.hx", lineNumber : 824, className : "openfl.net.SharedObject", methodName : "send"});
+	}
+	,setDirty: function(propertyName) {
+	}
+	,setProperty: function(propertyName,value) {
+		if(this.data != null) {
+			this.data[propertyName] = value;
+		}
+	}
+	,get_size: function() {
+		try {
+			var d = haxe_Serializer.run(this.data);
+			return haxe_io_Bytes.ofString(d).length;
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
+			return 0;
+		}
+	}
+	,__class__: openfl_net_SharedObject
+	,__properties__: {get_size:"get_size"}
+});
+var openfl_errors_Error = function(message,id) {
+	if(id == null) {
+		id = 0;
+	}
+	if(message == null) {
+		message = "";
+	}
+	this.message = message;
+	this.errorID = id;
+	this.name = "Error";
+};
+$hxClasses["openfl.errors.Error"] = openfl_errors_Error;
+openfl_errors_Error.__name__ = "openfl.errors.Error";
+openfl_errors_Error.prototype = {
+	errorID: null
+	,message: null
+	,name: null
+	,getStackTrace: function() {
+		return haxe_CallStack.toString(haxe_CallStack.exceptionStack());
+	}
+	,toString: function() {
+		if(this.message != null) {
+			return this.message;
+		} else {
+			return "Error";
+		}
+	}
+	,__class__: openfl_errors_Error
+};
+var js__$Boot_HaxeError = function(val) {
+	Error.call(this);
+	this.val = val;
+	if(Error.captureStackTrace) {
+		Error.captureStackTrace(this,js__$Boot_HaxeError);
+	}
+};
+$hxClasses["js._Boot.HaxeError"] = js__$Boot_HaxeError;
+js__$Boot_HaxeError.__name__ = "js._Boot.HaxeError";
+js__$Boot_HaxeError.wrap = function(val) {
+	if(((val) instanceof Error)) {
+		return val;
+	} else {
+		return new js__$Boot_HaxeError(val);
+	}
+};
+js__$Boot_HaxeError.__super__ = Error;
+js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
+	val: null
+	,__class__: js__$Boot_HaxeError
+});
+var haxe_ds__$StringMap_StringMapIterator = function(map,keys) {
+	this.map = map;
+	this.keys = keys;
+	this.index = 0;
+	this.count = keys.length;
+};
+$hxClasses["haxe.ds._StringMap.StringMapIterator"] = haxe_ds__$StringMap_StringMapIterator;
+haxe_ds__$StringMap_StringMapIterator.__name__ = "haxe.ds._StringMap.StringMapIterator";
+haxe_ds__$StringMap_StringMapIterator.prototype = {
+	map: null
+	,keys: null
+	,index: null
+	,count: null
+	,hasNext: function() {
+		return this.index < this.count;
+	}
+	,next: function() {
+		var _this = this.map;
+		var key = this.keys[this.index++];
+		if(__map_reserved[key] != null) {
+			return _this.getReserved(key);
+		} else {
+			return _this.h[key];
+		}
+	}
+	,__class__: haxe_ds__$StringMap_StringMapIterator
+};
+var js_Browser = function() { };
+$hxClasses["js.Browser"] = js_Browser;
+js_Browser.__name__ = "js.Browser";
+js_Browser.getLocalStorage = function() {
+	try {
+		var s = window.localStorage;
+		s.getItem("");
+		if(s.length == 0) {
+			var key = "_hx_" + Math.random();
+			s.setItem(key,key);
+			s.removeItem(key);
+		}
+		return s;
+	} catch( e ) {
+		haxe_CallStack.lastException = e;
+		var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
+		return null;
+	}
+};
+Math.__name__ = "Math";
+var haxe__$Unserializer_DefaultResolver = function() {
+};
+$hxClasses["haxe._Unserializer.DefaultResolver"] = haxe__$Unserializer_DefaultResolver;
+haxe__$Unserializer_DefaultResolver.__name__ = "haxe._Unserializer.DefaultResolver";
+haxe__$Unserializer_DefaultResolver.prototype = {
+	resolveClass: function(name) {
+		return $hxClasses[name];
+	}
+	,resolveEnum: function(name) {
+		return $hxEnums[name];
+	}
+	,__class__: haxe__$Unserializer_DefaultResolver
+};
+var haxe_Unserializer = function(buf) {
+	this.buf = buf;
+	this.length = buf.length;
+	this.pos = 0;
+	this.scache = [];
+	this.cache = [];
+	var r = haxe_Unserializer.DEFAULT_RESOLVER;
+	if(r == null) {
+		r = new haxe__$Unserializer_DefaultResolver();
+		haxe_Unserializer.DEFAULT_RESOLVER = r;
+	}
+	this.resolver = r;
+};
+$hxClasses["haxe.Unserializer"] = haxe_Unserializer;
+haxe_Unserializer.__name__ = "haxe.Unserializer";
+haxe_Unserializer.initCodes = function() {
+	var codes = [];
+	var _g = 0;
+	var _g1 = haxe_Unserializer.BASE64.length;
+	while(_g < _g1) {
+		var i = _g++;
+		codes[haxe_Unserializer.BASE64.charCodeAt(i)] = i;
+	}
+	return codes;
+};
+haxe_Unserializer.run = function(v) {
+	return new haxe_Unserializer(v).unserialize();
+};
+haxe_Unserializer.prototype = {
+	buf: null
+	,pos: null
+	,length: null
+	,cache: null
+	,scache: null
+	,resolver: null
+	,setResolver: function(r) {
+		if(r == null) {
+			if(haxe__$Unserializer_NullResolver.instance == null) {
+				haxe__$Unserializer_NullResolver.instance = new haxe__$Unserializer_NullResolver();
+			}
+			this.resolver = haxe__$Unserializer_NullResolver.instance;
+		} else {
+			this.resolver = r;
+		}
+	}
+	,readDigits: function() {
+		var k = 0;
+		var s = false;
+		var fpos = this.pos;
+		while(true) {
+			var c = this.buf.charCodeAt(this.pos);
+			if(c != c) {
+				break;
+			}
+			if(c == 45) {
+				if(this.pos != fpos) {
+					break;
+				}
+				s = true;
+				this.pos++;
+				continue;
+			}
+			if(c < 48 || c > 57) {
+				break;
+			}
+			k = k * 10 + (c - 48);
+			this.pos++;
+		}
+		if(s) {
+			k *= -1;
+		}
+		return k;
+	}
+	,readFloat: function() {
+		var p1 = this.pos;
+		while(true) {
+			var c = this.buf.charCodeAt(this.pos);
+			if(c != c) {
+				break;
+			}
+			if(c >= 43 && c < 58 || c == 101 || c == 69) {
+				this.pos++;
+			} else {
+				break;
+			}
+		}
+		return parseFloat(HxOverrides.substr(this.buf,p1,this.pos - p1));
+	}
+	,unserializeObject: function(o) {
+		while(true) {
+			if(this.pos >= this.length) {
+				throw new js__$Boot_HaxeError("Invalid object");
+			}
+			if(this.buf.charCodeAt(this.pos) == 103) {
+				break;
+			}
+			var k = this.unserialize();
+			if(typeof(k) != "string") {
+				throw new js__$Boot_HaxeError("Invalid object key");
+			}
+			var v = this.unserialize();
+			o[k] = v;
+		}
+		this.pos++;
+	}
+	,unserializeEnum: function(edecl,tag) {
+		if(this.buf.charCodeAt(this.pos++) != 58) {
+			throw new js__$Boot_HaxeError("Invalid enum format");
+		}
+		var nargs = this.readDigits();
+		if(nargs == 0) {
+			return Type.createEnum(edecl,tag);
+		}
+		var args = [];
+		while(nargs-- > 0) args.push(this.unserialize());
+		return Type.createEnum(edecl,tag,args);
+	}
+	,unserialize: function() {
+		switch(this.buf.charCodeAt(this.pos++)) {
+		case 65:
+			var name = this.unserialize();
+			var cl = this.resolver.resolveClass(name);
+			if(cl == null) {
+				throw new js__$Boot_HaxeError("Class not found " + name);
+			}
+			return cl;
+		case 66:
+			var name1 = this.unserialize();
+			var e = this.resolver.resolveEnum(name1);
+			if(e == null) {
+				throw new js__$Boot_HaxeError("Enum not found " + name1);
+			}
+			return e;
+		case 67:
+			var name2 = this.unserialize();
+			var cl1 = this.resolver.resolveClass(name2);
+			if(cl1 == null) {
+				throw new js__$Boot_HaxeError("Class not found " + name2);
+			}
+			var o = Object.create(cl1.prototype);
+			this.cache.push(o);
+			o.hxUnserialize(this);
+			if(this.buf.charCodeAt(this.pos++) != 103) {
+				throw new js__$Boot_HaxeError("Invalid custom data");
+			}
+			return o;
+		case 77:
+			var h = new haxe_ds_ObjectMap();
+			this.cache.push(h);
+			var buf = this.buf;
+			while(this.buf.charCodeAt(this.pos) != 104) {
+				var s = this.unserialize();
+				h.set(s,this.unserialize());
+			}
+			this.pos++;
+			return h;
+		case 82:
+			var n = this.readDigits();
+			if(n < 0 || n >= this.scache.length) {
+				throw new js__$Boot_HaxeError("Invalid string reference");
+			}
+			return this.scache[n];
+		case 97:
+			var buf1 = this.buf;
+			var a = [];
+			this.cache.push(a);
+			while(true) {
+				var c = this.buf.charCodeAt(this.pos);
+				if(c == 104) {
+					this.pos++;
+					break;
+				}
+				if(c == 117) {
+					this.pos++;
+					var n1 = this.readDigits();
+					a[a.length + n1 - 1] = null;
+				} else {
+					a.push(this.unserialize());
+				}
+			}
+			return a;
+		case 98:
+			var h1 = new haxe_ds_StringMap();
+			this.cache.push(h1);
+			var buf2 = this.buf;
+			while(this.buf.charCodeAt(this.pos) != 104) {
+				var s1 = this.unserialize();
+				var value = this.unserialize();
+				if(__map_reserved[s1] != null) {
+					h1.setReserved(s1,value);
+				} else {
+					h1.h[s1] = value;
+				}
+			}
+			this.pos++;
+			return h1;
+		case 99:
+			var name3 = this.unserialize();
+			var cl2 = this.resolver.resolveClass(name3);
+			if(cl2 == null) {
+				throw new js__$Boot_HaxeError("Class not found " + name3);
+			}
+			var o1 = Object.create(cl2.prototype);
+			this.cache.push(o1);
+			this.unserializeObject(o1);
+			return o1;
+		case 100:
+			return this.readFloat();
+		case 102:
+			return false;
+		case 105:
+			return this.readDigits();
+		case 106:
+			var name4 = this.unserialize();
+			var edecl = this.resolver.resolveEnum(name4);
+			if(edecl == null) {
+				throw new js__$Boot_HaxeError("Enum not found " + name4);
+			}
+			this.pos++;
+			var index = this.readDigits();
+			var tag = edecl.__constructs__.slice()[index];
+			if(tag == null) {
+				throw new js__$Boot_HaxeError("Unknown enum index " + name4 + "@" + index);
+			}
+			var e1 = this.unserializeEnum(edecl,tag);
+			this.cache.push(e1);
+			return e1;
+		case 107:
+			return NaN;
+		case 108:
+			var l = new haxe_ds_List();
+			this.cache.push(l);
+			var buf3 = this.buf;
+			while(this.buf.charCodeAt(this.pos) != 104) l.add(this.unserialize());
+			this.pos++;
+			return l;
+		case 109:
+			return -Infinity;
+		case 110:
+			return null;
+		case 111:
+			var o2 = { };
+			this.cache.push(o2);
+			this.unserializeObject(o2);
+			return o2;
+		case 112:
+			return Infinity;
+		case 113:
+			var h2 = new haxe_ds_IntMap();
+			this.cache.push(h2);
+			var buf4 = this.buf;
+			var c1 = this.buf.charCodeAt(this.pos++);
+			while(c1 == 58) {
+				var i = this.readDigits();
+				var value1 = this.unserialize();
+				h2.h[i] = value1;
+				c1 = this.buf.charCodeAt(this.pos++);
+			}
+			if(c1 != 104) {
+				throw new js__$Boot_HaxeError("Invalid IntMap format");
+			}
+			return h2;
+		case 114:
+			var n2 = this.readDigits();
+			if(n2 < 0 || n2 >= this.cache.length) {
+				throw new js__$Boot_HaxeError("Invalid reference");
+			}
+			return this.cache[n2];
+		case 115:
+			var len = this.readDigits();
+			var buf5 = this.buf;
+			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) {
+				throw new js__$Boot_HaxeError("Invalid bytes length");
+			}
+			var codes = haxe_Unserializer.CODES;
+			if(codes == null) {
+				codes = haxe_Unserializer.initCodes();
+				haxe_Unserializer.CODES = codes;
+			}
+			var i1 = this.pos;
+			var rest = len & 3;
+			var size = (len >> 2) * 3 + (rest >= 2 ? rest - 1 : 0);
+			var max = i1 + (len - rest);
+			var bytes = new haxe_io_Bytes(new ArrayBuffer(size));
+			var bpos = 0;
+			while(i1 < max) {
+				var c11 = codes[buf5.charCodeAt(i1++)];
+				var c2 = codes[buf5.charCodeAt(i1++)];
+				bytes.b[bpos++] = (c11 << 2 | c2 >> 4) & 255;
+				var c3 = codes[buf5.charCodeAt(i1++)];
+				bytes.b[bpos++] = (c2 << 4 | c3 >> 2) & 255;
+				var c4 = codes[buf5.charCodeAt(i1++)];
+				bytes.b[bpos++] = (c3 << 6 | c4) & 255;
+			}
+			if(rest >= 2) {
+				var c12 = codes[buf5.charCodeAt(i1++)];
+				var c21 = codes[buf5.charCodeAt(i1++)];
+				bytes.b[bpos++] = (c12 << 2 | c21 >> 4) & 255;
+				if(rest == 3) {
+					var c31 = codes[buf5.charCodeAt(i1++)];
+					bytes.b[bpos++] = (c21 << 4 | c31 >> 2) & 255;
+				}
+			}
+			this.pos += len;
+			this.cache.push(bytes);
+			return bytes;
+		case 116:
+			return true;
+		case 118:
+			var d;
+			if(this.buf.charCodeAt(this.pos) >= 48 && this.buf.charCodeAt(this.pos) <= 57 && this.buf.charCodeAt(this.pos + 1) >= 48 && this.buf.charCodeAt(this.pos + 1) <= 57 && this.buf.charCodeAt(this.pos + 2) >= 48 && this.buf.charCodeAt(this.pos + 2) <= 57 && this.buf.charCodeAt(this.pos + 3) >= 48 && this.buf.charCodeAt(this.pos + 3) <= 57 && this.buf.charCodeAt(this.pos + 4) == 45) {
+				d = HxOverrides.strDate(HxOverrides.substr(this.buf,this.pos,19));
+				this.pos += 19;
+			} else {
+				d = new Date(this.readFloat());
+			}
+			this.cache.push(d);
+			return d;
+		case 119:
+			var name5 = this.unserialize();
+			var edecl1 = this.resolver.resolveEnum(name5);
+			if(edecl1 == null) {
+				throw new js__$Boot_HaxeError("Enum not found " + name5);
+			}
+			var e2 = this.unserializeEnum(edecl1,this.unserialize());
+			this.cache.push(e2);
+			return e2;
+		case 120:
+			throw js__$Boot_HaxeError.wrap(this.unserialize());
+		case 121:
+			var len1 = this.readDigits();
+			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len1) {
+				throw new js__$Boot_HaxeError("Invalid string length");
+			}
+			var s2 = HxOverrides.substr(this.buf,this.pos,len1);
+			this.pos += len1;
+			s2 = decodeURIComponent(s2.split("+").join(" "));
+			this.scache.push(s2);
+			return s2;
+		case 122:
+			return 0;
+		default:
+		}
+		this.pos--;
+		throw new js__$Boot_HaxeError("Invalid char " + this.buf.charAt(this.pos) + " at position " + this.pos);
+	}
+	,__class__: haxe_Unserializer
+};
+var Type = function() { };
+$hxClasses["Type"] = Type;
+Type.__name__ = "Type";
+Type.resolveEnum = function(name) {
+	return $hxEnums[name];
+};
+Type.createInstance = function(cl,args) {
+	return new (Function.prototype.bind.apply(cl,[null].concat(args)));
+};
+Type.createEnum = function(e,constr,params) {
+	var f = Reflect.field(e,constr);
+	if(f == null) {
+		throw new js__$Boot_HaxeError("No such constructor " + constr);
+	}
+	if(Reflect.isFunction(f)) {
+		if(params == null) {
+			throw new js__$Boot_HaxeError("Constructor " + constr + " need parameters");
+		}
+		return f.apply(e,params);
+	}
+	if(params != null && params.length != 0) {
+		throw new js__$Boot_HaxeError("Constructor " + constr + " does not need parameters");
+	}
+	return f;
+};
+Type.getInstanceFields = function(c) {
+	var a = [];
+	for(var i in c.prototype) a.push(i);
+	HxOverrides.remove(a,"__class__");
+	HxOverrides.remove(a,"__properties__");
+	return a;
+};
+Type.typeof = function(v) {
+	switch(typeof(v)) {
+	case "boolean":
+		return ValueType.TBool;
+	case "function":
+		if(v.__name__ || v.__ename__) {
+			return ValueType.TObject;
+		}
+		return ValueType.TFunction;
+	case "number":
+		if(Math.ceil(v) == v % 2147483648.0) {
+			return ValueType.TInt;
+		}
+		return ValueType.TFloat;
+	case "object":
+		if(v == null) {
+			return ValueType.TNull;
+		}
+		var e = v.__enum__;
+		if(e != null) {
+			return ValueType.TEnum($hxEnums[e]);
+		}
+		var c = js_Boot.getClass(v);
+		if(c != null) {
+			return ValueType.TClass(c);
+		}
+		return ValueType.TObject;
+	case "string":
+		return ValueType.TClass(String);
+	case "undefined":
+		return ValueType.TNull;
+	default:
+		return ValueType.TUnknown;
+	}
+};
+Type.enumEq = function(a,b) {
+	if(a == b) {
+		return true;
+	}
+	try {
+		var e = a.__enum__;
+		if(e == null || e != b.__enum__) {
+			return false;
+		}
+		if(a._hx_index != b._hx_index) {
+			return false;
+		}
+		var enm = $hxEnums[e];
+		var ctorName = enm.__constructs__[a._hx_index];
+		var params = enm[ctorName].__params__;
+		var _g = 0;
+		while(_g < params.length) {
+			var f = params[_g];
+			++_g;
+			if(!Type.enumEq(a[f],b[f])) {
+				return false;
+			}
+		}
+	} catch( e1 ) {
+		haxe_CallStack.lastException = e1;
+		var e2 = ((e1) instanceof js__$Boot_HaxeError) ? e1.val : e1;
+		return false;
+	}
+	return true;
+};
+Type.enumParameters = function(e) {
+	var enm = $hxEnums[e.__enum__];
+	var ctorName = enm.__constructs__[e._hx_index];
+	var params = enm[ctorName].__params__;
+	if(params != null) {
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < params.length) {
+			var p = params[_g1];
+			++_g1;
+			_g.push(e[p]);
+		}
+		return _g;
+	} else {
+		return [];
+	}
+};
+var StringTools = function() { };
+$hxClasses["StringTools"] = StringTools;
+StringTools.__name__ = "StringTools";
+StringTools.htmlEscape = function(s,quotes) {
+	var buf_b = "";
+	var _g_offset = 0;
+	var _g_s = s;
+	while(_g_offset < _g_s.length) {
+		var s1 = _g_s;
+		var index = _g_offset++;
+		var c = s1.charCodeAt(index);
+		if(c >= 55296 && c <= 56319) {
+			c = c - 55232 << 10 | s1.charCodeAt(index + 1) & 1023;
+		}
+		var c1 = c;
+		if(c1 >= 65536) {
+			++_g_offset;
+		}
+		var code = c1;
+		switch(code) {
+		case 34:
+			if(quotes) {
+				buf_b += "&quot;";
+			} else {
+				buf_b += String.fromCodePoint(code);
+			}
+			break;
+		case 38:
+			buf_b += "&amp;";
+			break;
+		case 39:
+			if(quotes) {
+				buf_b += "&#039;";
+			} else {
+				buf_b += String.fromCodePoint(code);
+			}
+			break;
+		case 60:
+			buf_b += "&lt;";
+			break;
+		case 62:
+			buf_b += "&gt;";
+			break;
+		default:
+			buf_b += String.fromCodePoint(code);
+		}
+	}
+	return buf_b;
+};
+StringTools.startsWith = function(s,start) {
+	if(s.length >= start.length) {
+		return s.lastIndexOf(start,0) == 0;
+	} else {
+		return false;
+	}
+};
+StringTools.endsWith = function(s,end) {
+	var elen = end.length;
+	var slen = s.length;
+	if(slen >= elen) {
+		return s.indexOf(end,slen - elen) == slen - elen;
+	} else {
+		return false;
+	}
+};
+StringTools.isSpace = function(s,pos) {
+	var c = HxOverrides.cca(s,pos);
+	if(!(c > 8 && c < 14)) {
+		return c == 32;
+	} else {
+		return true;
+	}
+};
+StringTools.ltrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,r)) ++r;
+	if(r > 0) {
+		return HxOverrides.substr(s,r,l - r);
+	} else {
+		return s;
+	}
+};
+StringTools.rtrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,l - r - 1)) ++r;
+	if(r > 0) {
+		return HxOverrides.substr(s,0,l - r);
+	} else {
+		return s;
+	}
+};
+StringTools.trim = function(s) {
+	return StringTools.ltrim(StringTools.rtrim(s));
+};
+StringTools.replace = function(s,sub,by) {
+	return s.split(sub).join(by);
+};
+StringTools.hex = function(n,digits) {
+	var s = "";
+	var hexChars = "0123456789ABCDEF";
+	while(true) {
+		s = hexChars.charAt(n & 15) + s;
+		n >>>= 4;
+		if(!(n > 0)) {
+			break;
+		}
+	}
+	if(digits != null) {
+		while(s.length < digits) s = "0" + s;
+	}
+	return s;
+};
 var GameBalloonConfig = function() {
 	hacksaw_Scene.call(this);
 };
@@ -7359,13 +8269,14 @@ GameBalloonConfig.__name__ = "GameBalloonConfig";
 GameBalloonConfig.__super__ = hacksaw_Scene;
 GameBalloonConfig.prototype = $extend(hacksaw_Scene.prototype,{
 	onEnter: function(previous) {
+		var _gthis = this;
 		this.opaqueBackground = 0;
 		var rows = new feathers_controls_LayoutGroup();
 		rows.set_layout(new feathers_layout_VerticalLayout());
 		this.addChild(rows);
 		var tf = this.newTextField("<- Back");
 		tf.addEventListener("click",function(e) {
-			hacksaw_SceneManager.pop();
+			_gthis.saveAndClose();
 			return;
 		});
 		rows.addChild(tf);
@@ -7380,7 +8291,7 @@ GameBalloonConfig.prototype = $extend(hacksaw_Scene.prototype,{
 		cols.addChild(this.newRadio("15",toggleGroup));
 		cols.addChild(this.newRadio("20",toggleGroup));
 		toggleGroup.addEventListener("change",$bind(this,this.onChangeMaxNumber));
-		GameBalloon.MAX_NUMBER = 5;
+		GameBalloonConfig.config.data.maxNumber = 5;
 		rows.addChild(this.newTextField("Min number:"));
 		var cols1 = new feathers_controls_LayoutGroup();
 		cols1.set_layout(new feathers_layout_HorizontalLayout());
@@ -7391,19 +8302,23 @@ GameBalloonConfig.prototype = $extend(hacksaw_Scene.prototype,{
 		cols1.addChild(this.newRadio("10",toggleGroup1));
 		cols1.addChild(this.newRadio("15",toggleGroup1));
 		toggleGroup1.addEventListener("change",$bind(this,this.onChangeMinNumber));
-		GameBalloon.MIN_NUMBER = 1;
+		GameBalloonConfig.config.data.minNumber = 1;
+	}
+	,saveAndClose: function() {
+		GameBalloonConfig.config.flush();
+		hacksaw_SceneManager.pop();
 	}
 	,onChangeMaxNumber: function(event) {
 		var group = js_Boot.__cast(event.currentTarget , feathers_core_ToggleGroup);
 		var radio = js_Boot.__cast(group.get_selectedItem() , feathers_controls_Radio);
 		var number = Std.parseInt(radio.get_text());
-		GameBalloon.MAX_NUMBER = number;
+		GameBalloonConfig.config.data.maxNumber = number;
 	}
 	,onChangeMinNumber: function(event) {
 		var group = js_Boot.__cast(event.currentTarget , feathers_core_ToggleGroup);
 		var radio = js_Boot.__cast(group.get_selectedItem() , feathers_controls_Radio);
 		var number = Std.parseInt(radio.get_text());
-		GameBalloon.MIN_NUMBER = number;
+		GameBalloonConfig.config.data.minNumber = number;
 	}
 	,newRadio: function(text,group) {
 		var radio = new feathers_controls_Radio();
@@ -8127,7 +9042,6 @@ _$_$ASSET_$_$OPENFL_$_$assets_$fonts_$verdana_$bold_$ttf1.__super__ = openfl_tex
 _$_$ASSET_$_$OPENFL_$_$assets_$fonts_$verdana_$bold_$ttf1.prototype = $extend(openfl_text_Font.prototype,{
 	__class__: _$_$ASSET_$_$OPENFL_$_$assets_$fonts_$verdana_$bold_$ttf1
 });
-Math.__name__ = "Math";
 var feathers_layout_ILayout = function() { };
 $hxClasses["feathers.layout.ILayout"] = feathers_layout_ILayout;
 feathers_layout_ILayout.__name__ = "feathers.layout.ILayout";
@@ -8377,120 +9291,6 @@ StringBuf.prototype = {
 	b: null
 	,__class__: StringBuf
 };
-var StringTools = function() { };
-$hxClasses["StringTools"] = StringTools;
-StringTools.__name__ = "StringTools";
-StringTools.htmlEscape = function(s,quotes) {
-	var buf_b = "";
-	var _g_offset = 0;
-	var _g_s = s;
-	while(_g_offset < _g_s.length) {
-		var s1 = _g_s;
-		var index = _g_offset++;
-		var c = s1.charCodeAt(index);
-		if(c >= 55296 && c <= 56319) {
-			c = c - 55232 << 10 | s1.charCodeAt(index + 1) & 1023;
-		}
-		var c1 = c;
-		if(c1 >= 65536) {
-			++_g_offset;
-		}
-		var code = c1;
-		switch(code) {
-		case 34:
-			if(quotes) {
-				buf_b += "&quot;";
-			} else {
-				buf_b += String.fromCodePoint(code);
-			}
-			break;
-		case 38:
-			buf_b += "&amp;";
-			break;
-		case 39:
-			if(quotes) {
-				buf_b += "&#039;";
-			} else {
-				buf_b += String.fromCodePoint(code);
-			}
-			break;
-		case 60:
-			buf_b += "&lt;";
-			break;
-		case 62:
-			buf_b += "&gt;";
-			break;
-		default:
-			buf_b += String.fromCodePoint(code);
-		}
-	}
-	return buf_b;
-};
-StringTools.startsWith = function(s,start) {
-	if(s.length >= start.length) {
-		return s.lastIndexOf(start,0) == 0;
-	} else {
-		return false;
-	}
-};
-StringTools.endsWith = function(s,end) {
-	var elen = end.length;
-	var slen = s.length;
-	if(slen >= elen) {
-		return s.indexOf(end,slen - elen) == slen - elen;
-	} else {
-		return false;
-	}
-};
-StringTools.isSpace = function(s,pos) {
-	var c = HxOverrides.cca(s,pos);
-	if(!(c > 8 && c < 14)) {
-		return c == 32;
-	} else {
-		return true;
-	}
-};
-StringTools.ltrim = function(s) {
-	var l = s.length;
-	var r = 0;
-	while(r < l && StringTools.isSpace(s,r)) ++r;
-	if(r > 0) {
-		return HxOverrides.substr(s,r,l - r);
-	} else {
-		return s;
-	}
-};
-StringTools.rtrim = function(s) {
-	var l = s.length;
-	var r = 0;
-	while(r < l && StringTools.isSpace(s,l - r - 1)) ++r;
-	if(r > 0) {
-		return HxOverrides.substr(s,0,l - r);
-	} else {
-		return s;
-	}
-};
-StringTools.trim = function(s) {
-	return StringTools.ltrim(StringTools.rtrim(s));
-};
-StringTools.replace = function(s,sub,by) {
-	return s.split(sub).join(by);
-};
-StringTools.hex = function(n,digits) {
-	var s = "";
-	var hexChars = "0123456789ABCDEF";
-	while(true) {
-		s = hexChars.charAt(n & 15) + s;
-		n >>>= 4;
-		if(!(n > 0)) {
-			break;
-		}
-	}
-	if(digits != null) {
-		while(s.length < digits) s = "0" + s;
-	}
-	return s;
-};
 var ValueType = $hxEnums["ValueType"] = { __ename__ : "ValueType", __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"]
 	,TNull: {_hx_index:0,__enum__:"ValueType",toString:$estr}
 	,TInt: {_hx_index:1,__enum__:"ValueType",toString:$estr}
@@ -8501,117 +9301,6 @@ var ValueType = $hxEnums["ValueType"] = { __ename__ : "ValueType", __constructs_
 	,TClass: ($_=function(c) { return {_hx_index:6,c:c,__enum__:"ValueType",toString:$estr}; },$_.__params__ = ["c"],$_)
 	,TEnum: ($_=function(e) { return {_hx_index:7,e:e,__enum__:"ValueType",toString:$estr}; },$_.__params__ = ["e"],$_)
 	,TUnknown: {_hx_index:8,__enum__:"ValueType",toString:$estr}
-};
-var Type = function() { };
-$hxClasses["Type"] = Type;
-Type.__name__ = "Type";
-Type.createInstance = function(cl,args) {
-	return new (Function.prototype.bind.apply(cl,[null].concat(args)));
-};
-Type.createEnum = function(e,constr,params) {
-	var f = Reflect.field(e,constr);
-	if(f == null) {
-		throw new js__$Boot_HaxeError("No such constructor " + constr);
-	}
-	if(Reflect.isFunction(f)) {
-		if(params == null) {
-			throw new js__$Boot_HaxeError("Constructor " + constr + " need parameters");
-		}
-		return f.apply(e,params);
-	}
-	if(params != null && params.length != 0) {
-		throw new js__$Boot_HaxeError("Constructor " + constr + " does not need parameters");
-	}
-	return f;
-};
-Type.getInstanceFields = function(c) {
-	var a = [];
-	for(var i in c.prototype) a.push(i);
-	HxOverrides.remove(a,"__class__");
-	HxOverrides.remove(a,"__properties__");
-	return a;
-};
-Type.typeof = function(v) {
-	switch(typeof(v)) {
-	case "boolean":
-		return ValueType.TBool;
-	case "function":
-		if(v.__name__ || v.__ename__) {
-			return ValueType.TObject;
-		}
-		return ValueType.TFunction;
-	case "number":
-		if(Math.ceil(v) == v % 2147483648.0) {
-			return ValueType.TInt;
-		}
-		return ValueType.TFloat;
-	case "object":
-		if(v == null) {
-			return ValueType.TNull;
-		}
-		var e = v.__enum__;
-		if(e != null) {
-			return ValueType.TEnum($hxEnums[e]);
-		}
-		var c = js_Boot.getClass(v);
-		if(c != null) {
-			return ValueType.TClass(c);
-		}
-		return ValueType.TObject;
-	case "string":
-		return ValueType.TClass(String);
-	case "undefined":
-		return ValueType.TNull;
-	default:
-		return ValueType.TUnknown;
-	}
-};
-Type.enumEq = function(a,b) {
-	if(a == b) {
-		return true;
-	}
-	try {
-		var e = a.__enum__;
-		if(e == null || e != b.__enum__) {
-			return false;
-		}
-		if(a._hx_index != b._hx_index) {
-			return false;
-		}
-		var enm = $hxEnums[e];
-		var ctorName = enm.__constructs__[a._hx_index];
-		var params = enm[ctorName].__params__;
-		var _g = 0;
-		while(_g < params.length) {
-			var f = params[_g];
-			++_g;
-			if(!Type.enumEq(a[f],b[f])) {
-				return false;
-			}
-		}
-	} catch( e1 ) {
-		haxe_CallStack.lastException = e1;
-		var e2 = ((e1) instanceof js__$Boot_HaxeError) ? e1.val : e1;
-		return false;
-	}
-	return true;
-};
-Type.enumParameters = function(e) {
-	var enm = $hxEnums[e.__enum__];
-	var ctorName = enm.__constructs__[e._hx_index];
-	var params = enm[ctorName].__params__;
-	if(params != null) {
-		var _g = [];
-		var _g1 = 0;
-		while(_g1 < params.length) {
-			var p = params[_g1];
-			++_g1;
-			_g.push(e[p]);
-		}
-		return _g;
-	} else {
-		return [];
-	}
 };
 var _$UInt_UInt_$Impl_$ = {};
 $hxClasses["_UInt.UInt_Impl_"] = _$UInt_UInt_$Impl_$;
@@ -18323,367 +19012,6 @@ haxe_Timer.prototype = {
 	}
 	,__class__: haxe_Timer
 };
-var haxe__$Unserializer_DefaultResolver = function() {
-};
-$hxClasses["haxe._Unserializer.DefaultResolver"] = haxe__$Unserializer_DefaultResolver;
-haxe__$Unserializer_DefaultResolver.__name__ = "haxe._Unserializer.DefaultResolver";
-haxe__$Unserializer_DefaultResolver.prototype = {
-	resolveClass: function(name) {
-		return $hxClasses[name];
-	}
-	,resolveEnum: function(name) {
-		return $hxEnums[name];
-	}
-	,__class__: haxe__$Unserializer_DefaultResolver
-};
-var haxe_Unserializer = function(buf) {
-	this.buf = buf;
-	this.length = buf.length;
-	this.pos = 0;
-	this.scache = [];
-	this.cache = [];
-	var r = haxe_Unserializer.DEFAULT_RESOLVER;
-	if(r == null) {
-		r = new haxe__$Unserializer_DefaultResolver();
-		haxe_Unserializer.DEFAULT_RESOLVER = r;
-	}
-	this.resolver = r;
-};
-$hxClasses["haxe.Unserializer"] = haxe_Unserializer;
-haxe_Unserializer.__name__ = "haxe.Unserializer";
-haxe_Unserializer.initCodes = function() {
-	var codes = [];
-	var _g = 0;
-	var _g1 = haxe_Unserializer.BASE64.length;
-	while(_g < _g1) {
-		var i = _g++;
-		codes[haxe_Unserializer.BASE64.charCodeAt(i)] = i;
-	}
-	return codes;
-};
-haxe_Unserializer.run = function(v) {
-	return new haxe_Unserializer(v).unserialize();
-};
-haxe_Unserializer.prototype = {
-	buf: null
-	,pos: null
-	,length: null
-	,cache: null
-	,scache: null
-	,resolver: null
-	,setResolver: function(r) {
-		if(r == null) {
-			if(haxe__$Unserializer_NullResolver.instance == null) {
-				haxe__$Unserializer_NullResolver.instance = new haxe__$Unserializer_NullResolver();
-			}
-			this.resolver = haxe__$Unserializer_NullResolver.instance;
-		} else {
-			this.resolver = r;
-		}
-	}
-	,readDigits: function() {
-		var k = 0;
-		var s = false;
-		var fpos = this.pos;
-		while(true) {
-			var c = this.buf.charCodeAt(this.pos);
-			if(c != c) {
-				break;
-			}
-			if(c == 45) {
-				if(this.pos != fpos) {
-					break;
-				}
-				s = true;
-				this.pos++;
-				continue;
-			}
-			if(c < 48 || c > 57) {
-				break;
-			}
-			k = k * 10 + (c - 48);
-			this.pos++;
-		}
-		if(s) {
-			k *= -1;
-		}
-		return k;
-	}
-	,readFloat: function() {
-		var p1 = this.pos;
-		while(true) {
-			var c = this.buf.charCodeAt(this.pos);
-			if(c != c) {
-				break;
-			}
-			if(c >= 43 && c < 58 || c == 101 || c == 69) {
-				this.pos++;
-			} else {
-				break;
-			}
-		}
-		return parseFloat(HxOverrides.substr(this.buf,p1,this.pos - p1));
-	}
-	,unserializeObject: function(o) {
-		while(true) {
-			if(this.pos >= this.length) {
-				throw new js__$Boot_HaxeError("Invalid object");
-			}
-			if(this.buf.charCodeAt(this.pos) == 103) {
-				break;
-			}
-			var k = this.unserialize();
-			if(typeof(k) != "string") {
-				throw new js__$Boot_HaxeError("Invalid object key");
-			}
-			var v = this.unserialize();
-			o[k] = v;
-		}
-		this.pos++;
-	}
-	,unserializeEnum: function(edecl,tag) {
-		if(this.buf.charCodeAt(this.pos++) != 58) {
-			throw new js__$Boot_HaxeError("Invalid enum format");
-		}
-		var nargs = this.readDigits();
-		if(nargs == 0) {
-			return Type.createEnum(edecl,tag);
-		}
-		var args = [];
-		while(nargs-- > 0) args.push(this.unserialize());
-		return Type.createEnum(edecl,tag,args);
-	}
-	,unserialize: function() {
-		switch(this.buf.charCodeAt(this.pos++)) {
-		case 65:
-			var name = this.unserialize();
-			var cl = this.resolver.resolveClass(name);
-			if(cl == null) {
-				throw new js__$Boot_HaxeError("Class not found " + name);
-			}
-			return cl;
-		case 66:
-			var name1 = this.unserialize();
-			var e = this.resolver.resolveEnum(name1);
-			if(e == null) {
-				throw new js__$Boot_HaxeError("Enum not found " + name1);
-			}
-			return e;
-		case 67:
-			var name2 = this.unserialize();
-			var cl1 = this.resolver.resolveClass(name2);
-			if(cl1 == null) {
-				throw new js__$Boot_HaxeError("Class not found " + name2);
-			}
-			var o = Object.create(cl1.prototype);
-			this.cache.push(o);
-			o.hxUnserialize(this);
-			if(this.buf.charCodeAt(this.pos++) != 103) {
-				throw new js__$Boot_HaxeError("Invalid custom data");
-			}
-			return o;
-		case 77:
-			var h = new haxe_ds_ObjectMap();
-			this.cache.push(h);
-			var buf = this.buf;
-			while(this.buf.charCodeAt(this.pos) != 104) {
-				var s = this.unserialize();
-				h.set(s,this.unserialize());
-			}
-			this.pos++;
-			return h;
-		case 82:
-			var n = this.readDigits();
-			if(n < 0 || n >= this.scache.length) {
-				throw new js__$Boot_HaxeError("Invalid string reference");
-			}
-			return this.scache[n];
-		case 97:
-			var buf1 = this.buf;
-			var a = [];
-			this.cache.push(a);
-			while(true) {
-				var c = this.buf.charCodeAt(this.pos);
-				if(c == 104) {
-					this.pos++;
-					break;
-				}
-				if(c == 117) {
-					this.pos++;
-					var n1 = this.readDigits();
-					a[a.length + n1 - 1] = null;
-				} else {
-					a.push(this.unserialize());
-				}
-			}
-			return a;
-		case 98:
-			var h1 = new haxe_ds_StringMap();
-			this.cache.push(h1);
-			var buf2 = this.buf;
-			while(this.buf.charCodeAt(this.pos) != 104) {
-				var s1 = this.unserialize();
-				var value = this.unserialize();
-				if(__map_reserved[s1] != null) {
-					h1.setReserved(s1,value);
-				} else {
-					h1.h[s1] = value;
-				}
-			}
-			this.pos++;
-			return h1;
-		case 99:
-			var name3 = this.unserialize();
-			var cl2 = this.resolver.resolveClass(name3);
-			if(cl2 == null) {
-				throw new js__$Boot_HaxeError("Class not found " + name3);
-			}
-			var o1 = Object.create(cl2.prototype);
-			this.cache.push(o1);
-			this.unserializeObject(o1);
-			return o1;
-		case 100:
-			return this.readFloat();
-		case 102:
-			return false;
-		case 105:
-			return this.readDigits();
-		case 106:
-			var name4 = this.unserialize();
-			var edecl = this.resolver.resolveEnum(name4);
-			if(edecl == null) {
-				throw new js__$Boot_HaxeError("Enum not found " + name4);
-			}
-			this.pos++;
-			var index = this.readDigits();
-			var tag = edecl.__constructs__.slice()[index];
-			if(tag == null) {
-				throw new js__$Boot_HaxeError("Unknown enum index " + name4 + "@" + index);
-			}
-			var e1 = this.unserializeEnum(edecl,tag);
-			this.cache.push(e1);
-			return e1;
-		case 107:
-			return NaN;
-		case 108:
-			var l = new haxe_ds_List();
-			this.cache.push(l);
-			var buf3 = this.buf;
-			while(this.buf.charCodeAt(this.pos) != 104) l.add(this.unserialize());
-			this.pos++;
-			return l;
-		case 109:
-			return -Infinity;
-		case 110:
-			return null;
-		case 111:
-			var o2 = { };
-			this.cache.push(o2);
-			this.unserializeObject(o2);
-			return o2;
-		case 112:
-			return Infinity;
-		case 113:
-			var h2 = new haxe_ds_IntMap();
-			this.cache.push(h2);
-			var buf4 = this.buf;
-			var c1 = this.buf.charCodeAt(this.pos++);
-			while(c1 == 58) {
-				var i = this.readDigits();
-				var value1 = this.unserialize();
-				h2.h[i] = value1;
-				c1 = this.buf.charCodeAt(this.pos++);
-			}
-			if(c1 != 104) {
-				throw new js__$Boot_HaxeError("Invalid IntMap format");
-			}
-			return h2;
-		case 114:
-			var n2 = this.readDigits();
-			if(n2 < 0 || n2 >= this.cache.length) {
-				throw new js__$Boot_HaxeError("Invalid reference");
-			}
-			return this.cache[n2];
-		case 115:
-			var len = this.readDigits();
-			var buf5 = this.buf;
-			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) {
-				throw new js__$Boot_HaxeError("Invalid bytes length");
-			}
-			var codes = haxe_Unserializer.CODES;
-			if(codes == null) {
-				codes = haxe_Unserializer.initCodes();
-				haxe_Unserializer.CODES = codes;
-			}
-			var i1 = this.pos;
-			var rest = len & 3;
-			var size = (len >> 2) * 3 + (rest >= 2 ? rest - 1 : 0);
-			var max = i1 + (len - rest);
-			var bytes = new haxe_io_Bytes(new ArrayBuffer(size));
-			var bpos = 0;
-			while(i1 < max) {
-				var c11 = codes[buf5.charCodeAt(i1++)];
-				var c2 = codes[buf5.charCodeAt(i1++)];
-				bytes.b[bpos++] = (c11 << 2 | c2 >> 4) & 255;
-				var c3 = codes[buf5.charCodeAt(i1++)];
-				bytes.b[bpos++] = (c2 << 4 | c3 >> 2) & 255;
-				var c4 = codes[buf5.charCodeAt(i1++)];
-				bytes.b[bpos++] = (c3 << 6 | c4) & 255;
-			}
-			if(rest >= 2) {
-				var c12 = codes[buf5.charCodeAt(i1++)];
-				var c21 = codes[buf5.charCodeAt(i1++)];
-				bytes.b[bpos++] = (c12 << 2 | c21 >> 4) & 255;
-				if(rest == 3) {
-					var c31 = codes[buf5.charCodeAt(i1++)];
-					bytes.b[bpos++] = (c21 << 4 | c31 >> 2) & 255;
-				}
-			}
-			this.pos += len;
-			this.cache.push(bytes);
-			return bytes;
-		case 116:
-			return true;
-		case 118:
-			var d;
-			if(this.buf.charCodeAt(this.pos) >= 48 && this.buf.charCodeAt(this.pos) <= 57 && this.buf.charCodeAt(this.pos + 1) >= 48 && this.buf.charCodeAt(this.pos + 1) <= 57 && this.buf.charCodeAt(this.pos + 2) >= 48 && this.buf.charCodeAt(this.pos + 2) <= 57 && this.buf.charCodeAt(this.pos + 3) >= 48 && this.buf.charCodeAt(this.pos + 3) <= 57 && this.buf.charCodeAt(this.pos + 4) == 45) {
-				d = HxOverrides.strDate(HxOverrides.substr(this.buf,this.pos,19));
-				this.pos += 19;
-			} else {
-				d = new Date(this.readFloat());
-			}
-			this.cache.push(d);
-			return d;
-		case 119:
-			var name5 = this.unserialize();
-			var edecl1 = this.resolver.resolveEnum(name5);
-			if(edecl1 == null) {
-				throw new js__$Boot_HaxeError("Enum not found " + name5);
-			}
-			var e2 = this.unserializeEnum(edecl1,this.unserialize());
-			this.cache.push(e2);
-			return e2;
-		case 120:
-			throw js__$Boot_HaxeError.wrap(this.unserialize());
-		case 121:
-			var len1 = this.readDigits();
-			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len1) {
-				throw new js__$Boot_HaxeError("Invalid string length");
-			}
-			var s2 = HxOverrides.substr(this.buf,this.pos,len1);
-			this.pos += len1;
-			s2 = decodeURIComponent(s2.split("+").join(" "));
-			this.scache.push(s2);
-			return s2;
-		case 122:
-			return 0;
-		default:
-		}
-		this.pos--;
-		throw new js__$Boot_HaxeError("Invalid char " + this.buf.charAt(this.pos) + " at position " + this.pos);
-	}
-	,__class__: haxe_Unserializer
-};
 var haxe__$Unserializer_NullResolver = function() {
 };
 $hxClasses["haxe._Unserializer.NullResolver"] = haxe__$Unserializer_NullResolver;
@@ -19503,33 +19831,6 @@ haxe_ds__$List_ListIterator.prototype = {
 		return val;
 	}
 	,__class__: haxe_ds__$List_ListIterator
-};
-var haxe_ds__$StringMap_StringMapIterator = function(map,keys) {
-	this.map = map;
-	this.keys = keys;
-	this.index = 0;
-	this.count = keys.length;
-};
-$hxClasses["haxe.ds._StringMap.StringMapIterator"] = haxe_ds__$StringMap_StringMapIterator;
-haxe_ds__$StringMap_StringMapIterator.__name__ = "haxe.ds._StringMap.StringMapIterator";
-haxe_ds__$StringMap_StringMapIterator.prototype = {
-	map: null
-	,keys: null
-	,index: null
-	,count: null
-	,hasNext: function() {
-		return this.index < this.count;
-	}
-	,next: function() {
-		var _this = this.map;
-		var key = this.keys[this.index++];
-		if(__map_reserved[key] != null) {
-			return _this.getReserved(key);
-		} else {
-			return _this.h[key];
-		}
-	}
-	,__class__: haxe_ds__$StringMap_StringMapIterator
 };
 var haxe_io_BytesBuffer = function() {
 	this.pos = 0;
@@ -21200,27 +21501,6 @@ haxe_zip_Uncompress.__name__ = "haxe.zip.Uncompress";
 haxe_zip_Uncompress.run = function(src,bufsize) {
 	return haxe_zip_InflateImpl.run(new haxe_io_BytesInput(src),bufsize);
 };
-var js__$Boot_HaxeError = function(val) {
-	Error.call(this);
-	this.val = val;
-	if(Error.captureStackTrace) {
-		Error.captureStackTrace(this,js__$Boot_HaxeError);
-	}
-};
-$hxClasses["js._Boot.HaxeError"] = js__$Boot_HaxeError;
-js__$Boot_HaxeError.__name__ = "js._Boot.HaxeError";
-js__$Boot_HaxeError.wrap = function(val) {
-	if(((val) instanceof Error)) {
-		return val;
-	} else {
-		return new js__$Boot_HaxeError(val);
-	}
-};
-js__$Boot_HaxeError.__super__ = Error;
-js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
-	val: null
-	,__class__: js__$Boot_HaxeError
-});
 var js_Boot = function() { };
 $hxClasses["js.Boot"] = js_Boot;
 js_Boot.__name__ = "js.Boot";
@@ -21817,10 +22097,10 @@ lime__$internal_backend_html5_HTML5HTTPRequest.prototype = {
 				var value = __map_reserved[key1] != null ? _this.getReserved(key1) : _this.h[key1];
 				if(key1.indexOf("[]") > -1 && ((value) instanceof Array)) {
 					var _g = [];
-					var x1 = $getIterator(value);
-					while(x1.hasNext()) {
-						var x11 = x1.next();
-						_g.push(encodeURIComponent(x11));
+					var x = $getIterator(value);
+					while(x.hasNext()) {
+						var x1 = x.next();
+						_g.push(encodeURIComponent(x1));
 					}
 					var arrayValue = _g.join("&amp;" + key1 + "=");
 					query += encodeURIComponent(key1) + "=" + arrayValue;
@@ -24605,8 +24885,8 @@ lime__$internal_graphics_ImageDataUtil.fillRect = function(image,rect,color,form
 		break;
 	case 2:
 		var bgra = color;
-		var this11 = 0;
-		var rgba1 = this11;
+		var this2 = 0;
+		var rgba1 = this2;
 		rgba1 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 		fillColor = rgba1;
 		break;
@@ -24881,20 +25161,20 @@ lime__$internal_graphics_ImageDataUtil.getColorBoundsRect = function(image,mask,
 		rgba = (argb >>> 16 & 255 & 255) << 24 | (argb >>> 8 & 255 & 255) << 16 | (argb & 255 & 255) << 8 | argb >>> 24 & 255 & 255;
 		_color = rgba;
 		var argb1 = mask;
-		var this11 = 0;
-		var rgba1 = this11;
+		var this2 = 0;
+		var rgba1 = this2;
 		rgba1 = (argb1 >>> 16 & 255 & 255) << 24 | (argb1 >>> 8 & 255 & 255) << 16 | (argb1 & 255 & 255) << 8 | argb1 >>> 24 & 255 & 255;
 		_mask = rgba1;
 		break;
 	case 2:
 		var bgra = color;
-		var this12 = 0;
-		var rgba2 = this12;
+		var this3 = 0;
+		var rgba2 = this3;
 		rgba2 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 		_color = rgba2;
 		var bgra1 = mask;
-		var this13 = 0;
-		var rgba3 = this13;
+		var this4 = 0;
+		var rgba3 = this4;
 		rgba3 = (bgra1 >>> 8 & 255 & 255) << 24 | (bgra1 >>> 16 & 255 & 255) << 16 | (bgra1 >>> 24 & 255 & 255) << 8 | bgra1 & 255 & 255;
 		_mask = rgba3;
 		break;
@@ -25065,8 +25345,8 @@ lime__$internal_graphics_ImageDataUtil.getPixel = function(image,x,y,format) {
 		argb = (pixel & 255 & 255) << 24 | (pixel >>> 24 & 255 & 255) << 16 | (pixel >>> 16 & 255 & 255) << 8 | pixel >>> 8 & 255 & 255;
 		return argb;
 	case 2:
-		var this11 = 0;
-		var bgra = this11;
+		var this2 = 0;
+		var bgra = this2;
 		bgra = (pixel >>> 8 & 255 & 255) << 24 | (pixel >>> 16 & 255 & 255) << 16 | (pixel >>> 24 & 255 & 255) << 8 | pixel & 255 & 255;
 		return bgra;
 	default:
@@ -25109,8 +25389,8 @@ lime__$internal_graphics_ImageDataUtil.getPixel32 = function(image,x,y,format) {
 		argb = (pixel & 255 & 255) << 24 | (pixel >>> 24 & 255 & 255) << 16 | (pixel >>> 16 & 255 & 255) << 8 | pixel >>> 8 & 255 & 255;
 		return argb;
 	case 2:
-		var this11 = 0;
-		var bgra = this11;
+		var this2 = 0;
+		var bgra = this2;
 		bgra = (pixel >>> 8 & 255 & 255) << 24 | (pixel >>> 16 & 255 & 255) << 16 | (pixel >>> 24 & 255 & 255) << 8 | pixel & 255 & 255;
 		return bgra;
 	default:
@@ -25175,8 +25455,8 @@ lime__$internal_graphics_ImageDataUtil.getPixels = function(image,rect,format) {
 				pixel = argb;
 				break;
 			case 2:
-				var this11 = 0;
-				var bgra1 = this11;
+				var this2 = 0;
+				var bgra1 = this2;
 				bgra1 = (pixel >>> 8 & 255 & 255) << 24 | (pixel >>> 16 & 255 & 255) << 16 | (pixel >>> 24 & 255 & 255) << 8 | pixel & 255 & 255;
 				bgra = bgra1;
 				pixel = bgra;
@@ -25637,16 +25917,16 @@ lime__$internal_graphics_ImageDataUtil.setPixel = function(image,x,y,color,forma
 		break;
 	case 2:
 		var bgra = color;
-		var this11 = 0;
-		var rgba1 = this11;
+		var this2 = 0;
+		var rgba1 = this2;
 		rgba1 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 		pixel = rgba1;
 		break;
 	default:
 		pixel = color;
 	}
-	var this12 = 0;
-	var source = this12;
+	var this3 = 0;
+	var source = this3;
 	var data = image.buffer.data;
 	var offset = 4 * (y + image.offsetY) * image.buffer.width + (x + image.offsetX) * 4;
 	var format1 = image.buffer.format;
@@ -25731,8 +26011,8 @@ lime__$internal_graphics_ImageDataUtil.setPixel32 = function(image,x,y,color,for
 		break;
 	case 2:
 		var bgra = color;
-		var this11 = 0;
-		var rgba1 = this11;
+		var this2 = 0;
+		var rgba1 = this2;
 		rgba1 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 		pixel = rgba1;
 		break;
@@ -25825,8 +26105,8 @@ lime__$internal_graphics_ImageDataUtil.setPixels = function(image,rect,bytePoint
 				break;
 			case 2:
 				var bgra = color;
-				var this11 = 0;
-				var rgba1 = this11;
+				var this2 = 0;
+				var rgba1 = this2;
 				rgba1 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 				pixel = rgba1;
 				break;
@@ -25892,30 +26172,30 @@ lime__$internal_graphics_ImageDataUtil.threshold = function(image,sourceImage,so
 		rgba = (argb >>> 16 & 255 & 255) << 24 | (argb >>> 8 & 255 & 255) << 16 | (argb & 255 & 255) << 8 | argb >>> 24 & 255 & 255;
 		_color = rgba;
 		var argb1 = mask;
-		var this11 = 0;
-		var rgba1 = this11;
+		var this2 = 0;
+		var rgba1 = this2;
 		rgba1 = (argb1 >>> 16 & 255 & 255) << 24 | (argb1 >>> 8 & 255 & 255) << 16 | (argb1 & 255 & 255) << 8 | argb1 >>> 24 & 255 & 255;
 		_mask = rgba1;
 		var argb2 = threshold;
-		var this12 = 0;
-		var rgba2 = this12;
+		var this3 = 0;
+		var rgba2 = this3;
 		rgba2 = (argb2 >>> 16 & 255 & 255) << 24 | (argb2 >>> 8 & 255 & 255) << 16 | (argb2 & 255 & 255) << 8 | argb2 >>> 24 & 255 & 255;
 		_threshold = rgba2;
 		break;
 	case 2:
 		var bgra = color;
-		var this13 = 0;
-		var rgba3 = this13;
+		var this4 = 0;
+		var rgba3 = this4;
 		rgba3 = (bgra >>> 8 & 255 & 255) << 24 | (bgra >>> 16 & 255 & 255) << 16 | (bgra >>> 24 & 255 & 255) << 8 | bgra & 255 & 255;
 		_color = rgba3;
 		var bgra1 = mask;
-		var this14 = 0;
-		var rgba4 = this14;
+		var this5 = 0;
+		var rgba4 = this5;
 		rgba4 = (bgra1 >>> 8 & 255 & 255) << 24 | (bgra1 >>> 16 & 255 & 255) << 16 | (bgra1 >>> 24 & 255 & 255) << 8 | bgra1 & 255 & 255;
 		_mask = rgba4;
 		var bgra2 = threshold;
-		var this15 = 0;
-		var rgba5 = this15;
+		var this6 = 0;
+		var rgba5 = this6;
 		rgba5 = (bgra2 >>> 8 & 255 & 255) << 24 | (bgra2 >>> 16 & 255 & 255) << 16 | (bgra2 >>> 24 & 255 & 255) << 8 | bgra2 & 255 & 255;
 		_threshold = rgba5;
 		break;
@@ -29517,15 +29797,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra = color;
-					var this11 = 0;
-					var argb2 = this11;
+					var this2 = 0;
+					var argb2 = this2;
 					argb2 = (bgra & 255 & 255) << 24 | (bgra >>> 8 & 255 & 255) << 16 | (bgra >>> 16 & 255 & 255) << 8 | bgra >>> 24 & 255 & 255;
 					argb = argb2;
 					break;
 				default:
 					var rgba1 = color;
-					var this12 = 0;
-					var argb3 = this12;
+					var this3 = 0;
+					var argb3 = this3;
 					argb3 = (rgba1 & 255 & 255) << 24 | (rgba1 >>> 24 & 255 & 255) << 16 | (rgba1 >>> 16 & 255 & 255) << 8 | rgba1 >>> 8 & 255 & 255;
 					argb = argb3;
 				}
@@ -29562,15 +29842,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra = color;
-					var this11 = 0;
-					var argb2 = this11;
+					var this2 = 0;
+					var argb2 = this2;
 					argb2 = (bgra & 255 & 255) << 24 | (bgra >>> 8 & 255 & 255) << 16 | (bgra >>> 16 & 255 & 255) << 8 | bgra >>> 24 & 255 & 255;
 					argb = argb2;
 					break;
 				default:
 					var rgba1 = color;
-					var this12 = 0;
-					var argb3 = this12;
+					var this3 = 0;
+					var argb3 = this3;
 					argb3 = (rgba1 & 255 & 255) << 24 | (rgba1 >>> 24 & 255 & 255) << 16 | (rgba1 >>> 16 & 255 & 255) << 8 | rgba1 >>> 8 & 255 & 255;
 					argb = argb3;
 				}
@@ -29623,14 +29903,14 @@ lime_graphics_Image.prototype = {
 				case 1:
 					return color;
 				case 2:
-					var this11 = 0;
-					var bgra = this11;
+					var this2 = 0;
+					var bgra = this2;
 					bgra = (color & 255 & 255) << 24 | (color >>> 8 & 255 & 255) << 16 | (color >>> 16 & 255 & 255) << 8 | color >>> 24 & 255 & 255;
 					var bgra1 = bgra;
 					return bgra1;
 				default:
-					var this12 = 0;
-					var rgba2 = this12;
+					var this3 = 0;
+					var rgba2 = this3;
 					rgba2 = (color >>> 16 & 255 & 255) << 24 | (color >>> 8 & 255 & 255) << 16 | (color & 255 & 255) << 8 | color >>> 24 & 255 & 255;
 					var rgba3 = rgba2;
 					return rgba3;
@@ -29664,14 +29944,14 @@ lime_graphics_Image.prototype = {
 				case 1:
 					return color;
 				case 2:
-					var this11 = 0;
-					var bgra = this11;
+					var this2 = 0;
+					var bgra = this2;
 					bgra = (color & 255 & 255) << 24 | (color >>> 8 & 255 & 255) << 16 | (color >>> 16 & 255 & 255) << 8 | color >>> 24 & 255 & 255;
 					var bgra1 = bgra;
 					return bgra1;
 				default:
-					var this12 = 0;
-					var rgba2 = this12;
+					var this3 = 0;
+					var rgba2 = this3;
 					rgba2 = (color >>> 16 & 255 & 255) << 24 | (color >>> 8 & 255 & 255) << 16 | (color & 255 & 255) << 8 | color >>> 24 & 255 & 255;
 					var rgba3 = rgba2;
 					return rgba3;
@@ -29783,15 +30063,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra = color;
-					var this11 = 0;
-					var argb2 = this11;
+					var this2 = 0;
+					var argb2 = this2;
 					argb2 = (bgra & 255 & 255) << 24 | (bgra >>> 8 & 255 & 255) << 16 | (bgra >>> 16 & 255 & 255) << 8 | bgra >>> 24 & 255 & 255;
 					argb = argb2;
 					break;
 				default:
 					var rgba1 = color;
-					var this12 = 0;
-					var argb3 = this12;
+					var this3 = 0;
+					var argb3 = this3;
 					argb3 = (rgba1 & 255 & 255) << 24 | (rgba1 >>> 24 & 255 & 255) << 16 | (rgba1 >>> 16 & 255 & 255) << 8 | rgba1 >>> 8 & 255 & 255;
 					argb = argb3;
 				}
@@ -29828,15 +30108,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra = color;
-					var this11 = 0;
-					var argb2 = this11;
+					var this2 = 0;
+					var argb2 = this2;
 					argb2 = (bgra & 255 & 255) << 24 | (bgra >>> 8 & 255 & 255) << 16 | (bgra >>> 16 & 255 & 255) << 8 | bgra >>> 24 & 255 & 255;
 					argb = argb2;
 					break;
 				default:
 					var rgba1 = color;
-					var this12 = 0;
-					var argb3 = this12;
+					var this3 = 0;
+					var argb3 = this3;
 					argb3 = (rgba1 & 255 & 255) << 24 | (rgba1 >>> 24 & 255 & 255) << 16 | (rgba1 >>> 16 & 255 & 255) << 8 | rgba1 >>> 8 & 255 & 255;
 					argb = argb3;
 				}
@@ -29900,15 +30180,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra = color;
-					var this11 = 0;
-					var argb1 = this11;
+					var this2 = 0;
+					var argb1 = this2;
 					argb1 = (bgra & 255 & 255) << 24 | (bgra >>> 8 & 255 & 255) << 16 | (bgra >>> 16 & 255 & 255) << 8 | bgra >>> 24 & 255 & 255;
 					_color = argb1;
 					break;
 				default:
 					var rgba1 = color;
-					var this12 = 0;
-					var argb2 = this12;
+					var this3 = 0;
+					var argb2 = this3;
 					argb2 = (rgba1 & 255 & 255) << 24 | (rgba1 >>> 24 & 255 & 255) << 16 | (rgba1 >>> 16 & 255 & 255) << 8 | rgba1 >>> 8 & 255 & 255;
 					_color = argb2;
 				}
@@ -29916,8 +30196,8 @@ lime_graphics_Image.prototype = {
 			var _mask;
 			if(format == null) {
 				var rgba2 = mask;
-				var this13 = 0;
-				var argb3 = this13;
+				var this4 = 0;
+				var argb3 = this4;
 				argb3 = (rgba2 & 255 & 255) << 24 | (rgba2 >>> 24 & 255 & 255) << 16 | (rgba2 >>> 16 & 255 & 255) << 8 | rgba2 >>> 8 & 255 & 255;
 				_mask = argb3;
 			} else {
@@ -29927,15 +30207,15 @@ lime_graphics_Image.prototype = {
 					break;
 				case 2:
 					var bgra1 = mask;
-					var this14 = 0;
-					var argb4 = this14;
+					var this5 = 0;
+					var argb4 = this5;
 					argb4 = (bgra1 & 255 & 255) << 24 | (bgra1 >>> 8 & 255 & 255) << 16 | (bgra1 >>> 16 & 255 & 255) << 8 | bgra1 >>> 24 & 255 & 255;
 					_mask = argb4;
 					break;
 				default:
 					var rgba3 = mask;
-					var this15 = 0;
-					var argb5 = this15;
+					var this6 = 0;
+					var argb5 = this6;
 					argb5 = (rgba3 & 255 & 255) << 24 | (rgba3 >>> 24 & 255 & 255) << 16 | (rgba3 >>> 16 & 255 & 255) << 8 | rgba3 >>> 8 & 255 & 255;
 					_mask = argb5;
 				}
@@ -37405,7 +37685,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 807833;
+	this.version = 238487;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -43435,140 +43715,140 @@ openfl__$internal_formats_agal__$AGALConverter_SamplerRegister.parse = function(
 	}
 	var b_high = 0;
 	var b_low = 15;
-	var this1_high = a.high & b_high;
-	var this1_low = a.low & b_low;
-	sr.f = this1_low;
+	var this_high = a.high & b_high;
+	var this_low = a.low & b_low;
+	sr.f = this_low;
 	var b1 = 56;
 	b1 &= 63;
 	var a1;
 	if(b1 == 0) {
-		var this11 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a1 = this11;
+		var this4 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a1 = this4;
 	} else if(b1 < 32) {
-		var this21 = new haxe__$Int64__$_$_$Int64(v.high >> b1,v.high << 32 - b1 | v.low >>> b1);
-		a1 = this21;
+		var this5 = new haxe__$Int64__$_$_$Int64(v.high >> b1,v.high << 32 - b1 | v.low >>> b1);
+		a1 = this5;
 	} else {
-		var this31 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b1 - 32);
-		a1 = this31;
+		var this6 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b1 - 32);
+		a1 = this6;
 	}
 	var b_high1 = 0;
 	var b_low1 = 15;
-	var this1_high1 = a1.high & b_high1;
-	var this1_low1 = a1.low & b_low1;
-	sr.m = this1_low1;
+	var this_high1 = a1.high & b_high1;
+	var this_low1 = a1.low & b_low1;
+	sr.m = this_low1;
 	var b2 = 52;
 	b2 &= 63;
 	var a2;
 	if(b2 == 0) {
-		var this12 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a2 = this12;
+		var this7 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a2 = this7;
 	} else if(b2 < 32) {
-		var this22 = new haxe__$Int64__$_$_$Int64(v.high >> b2,v.high << 32 - b2 | v.low >>> b2);
-		a2 = this22;
+		var this8 = new haxe__$Int64__$_$_$Int64(v.high >> b2,v.high << 32 - b2 | v.low >>> b2);
+		a2 = this8;
 	} else {
-		var this32 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b2 - 32);
-		a2 = this32;
+		var this9 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b2 - 32);
+		a2 = this9;
 	}
 	var b_high2 = 0;
 	var b_low2 = 15;
-	var this1_high2 = a2.high & b_high2;
-	var this1_low2 = a2.low & b_low2;
-	sr.w = this1_low2;
+	var this_high2 = a2.high & b_high2;
+	var this_low2 = a2.low & b_low2;
+	sr.w = this_low2;
 	var b3 = 48;
 	b3 &= 63;
 	var a3;
 	if(b3 == 0) {
-		var this13 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a3 = this13;
+		var this10 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a3 = this10;
 	} else if(b3 < 32) {
-		var this23 = new haxe__$Int64__$_$_$Int64(v.high >> b3,v.high << 32 - b3 | v.low >>> b3);
-		a3 = this23;
+		var this11 = new haxe__$Int64__$_$_$Int64(v.high >> b3,v.high << 32 - b3 | v.low >>> b3);
+		a3 = this11;
 	} else {
-		var this33 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b3 - 32);
-		a3 = this33;
+		var this12 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b3 - 32);
+		a3 = this12;
 	}
 	var b_high3 = 0;
 	var b_low3 = 15;
-	var this1_high3 = a3.high & b_high3;
-	var this1_low3 = a3.low & b_low3;
-	sr.s = this1_low3;
+	var this_high3 = a3.high & b_high3;
+	var this_low3 = a3.low & b_low3;
+	sr.s = this_low3;
 	var b4 = 44;
 	b4 &= 63;
 	var a4;
 	if(b4 == 0) {
-		var this14 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a4 = this14;
+		var this13 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a4 = this13;
 	} else if(b4 < 32) {
-		var this24 = new haxe__$Int64__$_$_$Int64(v.high >> b4,v.high << 32 - b4 | v.low >>> b4);
-		a4 = this24;
+		var this14 = new haxe__$Int64__$_$_$Int64(v.high >> b4,v.high << 32 - b4 | v.low >>> b4);
+		a4 = this14;
 	} else {
-		var this34 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b4 - 32);
-		a4 = this34;
+		var this15 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b4 - 32);
+		a4 = this15;
 	}
 	var b_high4 = 0;
 	var b_low4 = 15;
-	var this1_high4 = a4.high & b_high4;
-	var this1_low4 = a4.low & b_low4;
-	sr.d = this1_low4;
+	var this_high4 = a4.high & b_high4;
+	var this_low4 = a4.low & b_low4;
+	sr.d = this_low4;
 	var b5 = 40;
 	b5 &= 63;
 	var a5;
 	if(b5 == 0) {
-		var this15 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a5 = this15;
+		var this16 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a5 = this16;
 	} else if(b5 < 32) {
-		var this25 = new haxe__$Int64__$_$_$Int64(v.high >> b5,v.high << 32 - b5 | v.low >>> b5);
-		a5 = this25;
+		var this17 = new haxe__$Int64__$_$_$Int64(v.high >> b5,v.high << 32 - b5 | v.low >>> b5);
+		a5 = this17;
 	} else {
-		var this35 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b5 - 32);
-		a5 = this35;
+		var this18 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b5 - 32);
+		a5 = this18;
 	}
 	var b_high5 = 0;
 	var b_low5 = 15;
-	var this1_high5 = a5.high & b_high5;
-	var this1_low5 = a5.low & b_low5;
-	sr.t = this1_low5;
+	var this_high5 = a5.high & b_high5;
+	var this_low5 = a5.low & b_low5;
+	sr.t = this_low5;
 	var b6 = 32;
 	b6 &= 63;
 	var a6;
 	if(b6 == 0) {
-		var this16 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a6 = this16;
+		var this19 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a6 = this19;
 	} else if(b6 < 32) {
-		var this26 = new haxe__$Int64__$_$_$Int64(v.high >> b6,v.high << 32 - b6 | v.low >>> b6);
-		a6 = this26;
+		var this20 = new haxe__$Int64__$_$_$Int64(v.high >> b6,v.high << 32 - b6 | v.low >>> b6);
+		a6 = this20;
 	} else {
-		var this36 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b6 - 32);
-		a6 = this36;
+		var this21 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b6 - 32);
+		a6 = this21;
 	}
 	var b_high6 = 0;
 	var b_low6 = 15;
-	var this1_high6 = a6.high & b_high6;
-	var this1_low6 = a6.low & b_low6;
-	sr.type = this1_low6;
+	var this_high6 = a6.high & b_high6;
+	var this_low6 = a6.low & b_low6;
+	sr.type = this_low6;
 	var b7 = 16;
 	b7 &= 63;
 	var a7;
 	if(b7 == 0) {
-		var this17 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a7 = this17;
+		var this22 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a7 = this22;
 	} else if(b7 < 32) {
-		var this27 = new haxe__$Int64__$_$_$Int64(v.high >> b7,v.high << 32 - b7 | v.low >>> b7);
-		a7 = this27;
+		var this23 = new haxe__$Int64__$_$_$Int64(v.high >> b7,v.high << 32 - b7 | v.low >>> b7);
+		a7 = this23;
 	} else {
-		var this37 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b7 - 32);
-		a7 = this37;
+		var this24 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b7 - 32);
+		a7 = this24;
 	}
 	var b_high7 = 0;
 	var b_low7 = 255;
-	var this1_high7 = a7.high & b_high7;
-	var this1_low7 = a7.low & b_low7;
-	sr.b = this1_low7;
+	var this_high7 = a7.high & b_high7;
+	var this_low7 = a7.low & b_low7;
+	sr.b = this_low7;
 	var b_high8 = 0;
 	var b_low8 = 65535;
-	var this1_high8 = v.high & b_high8;
-	var this1_low8 = v.low & b_low8;
-	sr.n = this1_low8;
+	var this_high8 = v.high & b_high8;
+	var this_low8 = v.low & b_low8;
+	sr.n = this_low8;
 	return sr;
 };
 openfl__$internal_formats_agal__$AGALConverter_SamplerRegister.prototype = {
@@ -43653,104 +43933,104 @@ openfl__$internal_formats_agal__$AGALConverter_SourceRegister.parse = function(v
 	}
 	var b_high = 0;
 	var b_low = 1;
-	var this1_high = a.high & b_high;
-	var this1_low = a.low & b_low;
-	sr.d = this1_low;
+	var this_high = a.high & b_high;
+	var this_low = a.low & b_low;
+	sr.d = this_low;
 	var b1 = 48;
 	b1 &= 63;
 	var a1;
 	if(b1 == 0) {
-		var this11 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a1 = this11;
+		var this4 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a1 = this4;
 	} else if(b1 < 32) {
-		var this21 = new haxe__$Int64__$_$_$Int64(v.high >> b1,v.high << 32 - b1 | v.low >>> b1);
-		a1 = this21;
+		var this5 = new haxe__$Int64__$_$_$Int64(v.high >> b1,v.high << 32 - b1 | v.low >>> b1);
+		a1 = this5;
 	} else {
-		var this31 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b1 - 32);
-		a1 = this31;
+		var this6 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b1 - 32);
+		a1 = this6;
 	}
 	var b_high1 = 0;
 	var b_low1 = 3;
-	var this1_high1 = a1.high & b_high1;
-	var this1_low1 = a1.low & b_low1;
-	sr.q = this1_low1;
+	var this_high1 = a1.high & b_high1;
+	var this_low1 = a1.low & b_low1;
+	sr.q = this_low1;
 	var b2 = 40;
 	b2 &= 63;
 	var a2;
 	if(b2 == 0) {
-		var this12 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a2 = this12;
+		var this7 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a2 = this7;
 	} else if(b2 < 32) {
-		var this22 = new haxe__$Int64__$_$_$Int64(v.high >> b2,v.high << 32 - b2 | v.low >>> b2);
-		a2 = this22;
+		var this8 = new haxe__$Int64__$_$_$Int64(v.high >> b2,v.high << 32 - b2 | v.low >>> b2);
+		a2 = this8;
 	} else {
-		var this32 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b2 - 32);
-		a2 = this32;
+		var this9 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b2 - 32);
+		a2 = this9;
 	}
 	var b_high2 = 0;
 	var b_low2 = 15;
-	var this1_high2 = a2.high & b_high2;
-	var this1_low2 = a2.low & b_low2;
-	sr.itype = this1_low2;
+	var this_high2 = a2.high & b_high2;
+	var this_low2 = a2.low & b_low2;
+	sr.itype = this_low2;
 	var b3 = 32;
 	b3 &= 63;
 	var a3;
 	if(b3 == 0) {
-		var this13 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a3 = this13;
+		var this10 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a3 = this10;
 	} else if(b3 < 32) {
-		var this23 = new haxe__$Int64__$_$_$Int64(v.high >> b3,v.high << 32 - b3 | v.low >>> b3);
-		a3 = this23;
+		var this11 = new haxe__$Int64__$_$_$Int64(v.high >> b3,v.high << 32 - b3 | v.low >>> b3);
+		a3 = this11;
 	} else {
-		var this33 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b3 - 32);
-		a3 = this33;
+		var this12 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b3 - 32);
+		a3 = this12;
 	}
 	var b_high3 = 0;
 	var b_low3 = 15;
-	var this1_high3 = a3.high & b_high3;
-	var this1_low3 = a3.low & b_low3;
-	sr.type = this1_low3;
+	var this_high3 = a3.high & b_high3;
+	var this_low3 = a3.low & b_low3;
+	sr.type = this_low3;
 	var b4 = 24;
 	b4 &= 63;
 	var a4;
 	if(b4 == 0) {
-		var this14 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a4 = this14;
+		var this13 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a4 = this13;
 	} else if(b4 < 32) {
-		var this24 = new haxe__$Int64__$_$_$Int64(v.high >> b4,v.high << 32 - b4 | v.low >>> b4);
-		a4 = this24;
+		var this14 = new haxe__$Int64__$_$_$Int64(v.high >> b4,v.high << 32 - b4 | v.low >>> b4);
+		a4 = this14;
 	} else {
-		var this34 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b4 - 32);
-		a4 = this34;
+		var this15 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b4 - 32);
+		a4 = this15;
 	}
 	var b_high4 = 0;
 	var b_low4 = 255;
-	var this1_high4 = a4.high & b_high4;
-	var this1_low4 = a4.low & b_low4;
-	sr.s = this1_low4;
+	var this_high4 = a4.high & b_high4;
+	var this_low4 = a4.low & b_low4;
+	sr.s = this_low4;
 	var b5 = 16;
 	b5 &= 63;
 	var a5;
 	if(b5 == 0) {
-		var this15 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
-		a5 = this15;
+		var this16 = new haxe__$Int64__$_$_$Int64(v.high,v.low);
+		a5 = this16;
 	} else if(b5 < 32) {
-		var this25 = new haxe__$Int64__$_$_$Int64(v.high >> b5,v.high << 32 - b5 | v.low >>> b5);
-		a5 = this25;
+		var this17 = new haxe__$Int64__$_$_$Int64(v.high >> b5,v.high << 32 - b5 | v.low >>> b5);
+		a5 = this17;
 	} else {
-		var this35 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b5 - 32);
-		a5 = this35;
+		var this18 = new haxe__$Int64__$_$_$Int64(v.high >> 31,v.high >> b5 - 32);
+		a5 = this18;
 	}
 	var b_high5 = 0;
 	var b_low5 = 255;
-	var this1_high5 = a5.high & b_high5;
-	var this1_low5 = a5.low & b_low5;
-	sr.o = this1_low5;
+	var this_high5 = a5.high & b_high5;
+	var this_low5 = a5.low & b_low5;
+	sr.o = this_low5;
 	var b_high6 = 0;
 	var b_low6 = 65535;
-	var this1_high6 = v.high & b_high6;
-	var this1_low6 = v.low & b_low6;
-	sr.n = this1_low6;
+	var this_high6 = v.high & b_high6;
+	var this_low6 = v.low & b_low6;
+	sr.n = this_low6;
 	sr.sourceMask = sourceMask;
 	return sr;
 };
@@ -78062,35 +78342,6 @@ openfl_display3D_textures_VideoTexture.prototype = $extend(openfl_display3D_text
 	}
 	,__class__: openfl_display3D_textures_VideoTexture
 });
-var openfl_errors_Error = function(message,id) {
-	if(id == null) {
-		id = 0;
-	}
-	if(message == null) {
-		message = "";
-	}
-	this.message = message;
-	this.errorID = id;
-	this.name = "Error";
-};
-$hxClasses["openfl.errors.Error"] = openfl_errors_Error;
-openfl_errors_Error.__name__ = "openfl.errors.Error";
-openfl_errors_Error.prototype = {
-	errorID: null
-	,message: null
-	,name: null
-	,getStackTrace: function() {
-		return haxe_CallStack.toString(haxe_CallStack.exceptionStack());
-	}
-	,toString: function() {
-		if(this.message != null) {
-			return this.message;
-		} else {
-			return "Error";
-		}
-	}
-	,__class__: openfl_errors_Error
-};
 var openfl_errors_ArgumentError = function(message) {
 	if(message == null) {
 		message = "";
@@ -81876,6 +82127,29 @@ openfl_net_NetStream.prototype = $extend(openfl_events_EventDispatcher.prototype
 	,__class__: openfl_net_NetStream
 	,__properties__: {set___seeking:"set___seeking",get___seeking:"get___seeking",set_speed:"set_speed",get_speed:"get_speed",set_soundTransform:"set_soundTransform",get_soundTransform:"get_soundTransform"}
 });
+var openfl_net__$SharedObjectFlushStatus_SharedObjectFlushStatus_$Impl_$ = {};
+$hxClasses["openfl.net._SharedObjectFlushStatus.SharedObjectFlushStatus_Impl_"] = openfl_net__$SharedObjectFlushStatus_SharedObjectFlushStatus_$Impl_$;
+openfl_net__$SharedObjectFlushStatus_SharedObjectFlushStatus_$Impl_$.__name__ = "openfl.net._SharedObjectFlushStatus.SharedObjectFlushStatus_Impl_";
+openfl_net__$SharedObjectFlushStatus_SharedObjectFlushStatus_$Impl_$.fromString = function(value) {
+	switch(value) {
+	case "flushed":
+		return 0;
+	case "pending":
+		return 1;
+	default:
+		return null;
+	}
+};
+openfl_net__$SharedObjectFlushStatus_SharedObjectFlushStatus_$Impl_$.toString = function(this1) {
+	switch(this1) {
+	case 0:
+		return "flushed";
+	case 1:
+		return "pending";
+	default:
+		return null;
+	}
+};
 var openfl_net_URLLoader = function(request) {
 	openfl_events_EventDispatcher.call(this);
 	this.bytesLoaded = 0;
@@ -83371,537 +83645,537 @@ openfl_utils_AGALMiniAssembler.init = function() {
 	} else {
 		_this.h["mov"] = v;
 	}
-	var this11 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this2 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v1 = new openfl_utils__$AGALMiniAssembler_OpCode("add",3,1,0);
-	var _this1 = this11;
+	var _this1 = this2;
 	if(__map_reserved["add"] != null) {
 		_this1.setReserved("add",v1);
 	} else {
 		_this1.h["add"] = v1;
 	}
-	var this12 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this3 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v2 = new openfl_utils__$AGALMiniAssembler_OpCode("sub",3,2,0);
-	var _this2 = this12;
+	var _this2 = this3;
 	if(__map_reserved["sub"] != null) {
 		_this2.setReserved("sub",v2);
 	} else {
 		_this2.h["sub"] = v2;
 	}
-	var this13 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this4 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v3 = new openfl_utils__$AGALMiniAssembler_OpCode("mul",3,3,0);
-	var _this3 = this13;
+	var _this3 = this4;
 	if(__map_reserved["mul"] != null) {
 		_this3.setReserved("mul",v3);
 	} else {
 		_this3.h["mul"] = v3;
 	}
-	var this14 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this5 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v4 = new openfl_utils__$AGALMiniAssembler_OpCode("div",3,4,0);
-	var _this4 = this14;
+	var _this4 = this5;
 	if(__map_reserved["div"] != null) {
 		_this4.setReserved("div",v4);
 	} else {
 		_this4.h["div"] = v4;
 	}
-	var this15 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this6 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v5 = new openfl_utils__$AGALMiniAssembler_OpCode("rcp",2,5,0);
-	var _this5 = this15;
+	var _this5 = this6;
 	if(__map_reserved["rcp"] != null) {
 		_this5.setReserved("rcp",v5);
 	} else {
 		_this5.h["rcp"] = v5;
 	}
-	var this16 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this7 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v6 = new openfl_utils__$AGALMiniAssembler_OpCode("min",3,6,0);
-	var _this6 = this16;
+	var _this6 = this7;
 	if(__map_reserved["min"] != null) {
 		_this6.setReserved("min",v6);
 	} else {
 		_this6.h["min"] = v6;
 	}
-	var this17 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this8 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v7 = new openfl_utils__$AGALMiniAssembler_OpCode("max",3,7,0);
-	var _this7 = this17;
+	var _this7 = this8;
 	if(__map_reserved["max"] != null) {
 		_this7.setReserved("max",v7);
 	} else {
 		_this7.h["max"] = v7;
 	}
-	var this18 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this9 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v8 = new openfl_utils__$AGALMiniAssembler_OpCode("frc",2,8,0);
-	var _this8 = this18;
+	var _this8 = this9;
 	if(__map_reserved["frc"] != null) {
 		_this8.setReserved("frc",v8);
 	} else {
 		_this8.h["frc"] = v8;
 	}
-	var this19 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this10 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v9 = new openfl_utils__$AGALMiniAssembler_OpCode("sqt",2,9,0);
-	var _this9 = this19;
+	var _this9 = this10;
 	if(__map_reserved["sqt"] != null) {
 		_this9.setReserved("sqt",v9);
 	} else {
 		_this9.h["sqt"] = v9;
 	}
-	var this110 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this11 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v10 = new openfl_utils__$AGALMiniAssembler_OpCode("rsq",2,10,0);
-	var _this10 = this110;
+	var _this10 = this11;
 	if(__map_reserved["rsq"] != null) {
 		_this10.setReserved("rsq",v10);
 	} else {
 		_this10.h["rsq"] = v10;
 	}
-	var this111 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this12 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v11 = new openfl_utils__$AGALMiniAssembler_OpCode("pow",3,11,0);
-	var _this11 = this111;
+	var _this11 = this12;
 	if(__map_reserved["pow"] != null) {
 		_this11.setReserved("pow",v11);
 	} else {
 		_this11.h["pow"] = v11;
 	}
-	var this112 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this13 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v12 = new openfl_utils__$AGALMiniAssembler_OpCode("log",2,12,0);
-	var _this12 = this112;
+	var _this12 = this13;
 	if(__map_reserved["log"] != null) {
 		_this12.setReserved("log",v12);
 	} else {
 		_this12.h["log"] = v12;
 	}
-	var this113 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this14 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v13 = new openfl_utils__$AGALMiniAssembler_OpCode("exp",2,13,0);
-	var _this13 = this113;
+	var _this13 = this14;
 	if(__map_reserved["exp"] != null) {
 		_this13.setReserved("exp",v13);
 	} else {
 		_this13.h["exp"] = v13;
 	}
-	var this114 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this15 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v14 = new openfl_utils__$AGALMiniAssembler_OpCode("nrm",2,14,0);
-	var _this14 = this114;
+	var _this14 = this15;
 	if(__map_reserved["nrm"] != null) {
 		_this14.setReserved("nrm",v14);
 	} else {
 		_this14.h["nrm"] = v14;
 	}
-	var this115 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this16 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v15 = new openfl_utils__$AGALMiniAssembler_OpCode("sin",2,15,0);
-	var _this15 = this115;
+	var _this15 = this16;
 	if(__map_reserved["sin"] != null) {
 		_this15.setReserved("sin",v15);
 	} else {
 		_this15.h["sin"] = v15;
 	}
-	var this116 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this17 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v16 = new openfl_utils__$AGALMiniAssembler_OpCode("cos",2,16,0);
-	var _this16 = this116;
+	var _this16 = this17;
 	if(__map_reserved["cos"] != null) {
 		_this16.setReserved("cos",v16);
 	} else {
 		_this16.h["cos"] = v16;
 	}
-	var this117 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this18 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v17 = new openfl_utils__$AGALMiniAssembler_OpCode("crs",3,17,0);
-	var _this17 = this117;
+	var _this17 = this18;
 	if(__map_reserved["crs"] != null) {
 		_this17.setReserved("crs",v17);
 	} else {
 		_this17.h["crs"] = v17;
 	}
-	var this118 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this19 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v18 = new openfl_utils__$AGALMiniAssembler_OpCode("dp3",3,18,0);
-	var _this18 = this118;
+	var _this18 = this19;
 	if(__map_reserved["dp3"] != null) {
 		_this18.setReserved("dp3",v18);
 	} else {
 		_this18.h["dp3"] = v18;
 	}
-	var this119 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this20 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v19 = new openfl_utils__$AGALMiniAssembler_OpCode("dp4",3,19,0);
-	var _this19 = this119;
+	var _this19 = this20;
 	if(__map_reserved["dp4"] != null) {
 		_this19.setReserved("dp4",v19);
 	} else {
 		_this19.h["dp4"] = v19;
 	}
-	var this120 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this21 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v20 = new openfl_utils__$AGALMiniAssembler_OpCode("abs",2,20,0);
-	var _this20 = this120;
+	var _this20 = this21;
 	if(__map_reserved["abs"] != null) {
 		_this20.setReserved("abs",v20);
 	} else {
 		_this20.h["abs"] = v20;
 	}
-	var this121 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this22 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v21 = new openfl_utils__$AGALMiniAssembler_OpCode("neg",2,21,0);
-	var _this21 = this121;
+	var _this21 = this22;
 	if(__map_reserved["neg"] != null) {
 		_this21.setReserved("neg",v21);
 	} else {
 		_this21.h["neg"] = v21;
 	}
-	var this122 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this23 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v22 = new openfl_utils__$AGALMiniAssembler_OpCode("sat",2,22,0);
-	var _this22 = this122;
+	var _this22 = this23;
 	if(__map_reserved["sat"] != null) {
 		_this22.setReserved("sat",v22);
 	} else {
 		_this22.h["sat"] = v22;
 	}
-	var this123 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this24 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v23 = new openfl_utils__$AGALMiniAssembler_OpCode("m33",3,23,16);
-	var _this23 = this123;
+	var _this23 = this24;
 	if(__map_reserved["m33"] != null) {
 		_this23.setReserved("m33",v23);
 	} else {
 		_this23.h["m33"] = v23;
 	}
-	var this124 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this25 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v24 = new openfl_utils__$AGALMiniAssembler_OpCode("m44",3,24,16);
-	var _this24 = this124;
+	var _this24 = this25;
 	if(__map_reserved["m44"] != null) {
 		_this24.setReserved("m44",v24);
 	} else {
 		_this24.h["m44"] = v24;
 	}
-	var this125 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this26 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v25 = new openfl_utils__$AGALMiniAssembler_OpCode("m34",3,25,16);
-	var _this25 = this125;
+	var _this25 = this26;
 	if(__map_reserved["m34"] != null) {
 		_this25.setReserved("m34",v25);
 	} else {
 		_this25.h["m34"] = v25;
 	}
-	var this126 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this27 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v26 = new openfl_utils__$AGALMiniAssembler_OpCode("ddx",2,26,288);
-	var _this26 = this126;
+	var _this26 = this27;
 	if(__map_reserved["ddx"] != null) {
 		_this26.setReserved("ddx",v26);
 	} else {
 		_this26.h["ddx"] = v26;
 	}
-	var this127 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this28 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v27 = new openfl_utils__$AGALMiniAssembler_OpCode("ddy",2,27,288);
-	var _this27 = this127;
+	var _this27 = this28;
 	if(__map_reserved["ddy"] != null) {
 		_this27.setReserved("ddy",v27);
 	} else {
 		_this27.h["ddy"] = v27;
 	}
-	var this128 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this29 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v28 = new openfl_utils__$AGALMiniAssembler_OpCode("ife",2,28,897);
-	var _this28 = this128;
+	var _this28 = this29;
 	if(__map_reserved["ife"] != null) {
 		_this28.setReserved("ife",v28);
 	} else {
 		_this28.h["ife"] = v28;
 	}
-	var this129 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this30 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v29 = new openfl_utils__$AGALMiniAssembler_OpCode("ine",2,29,897);
-	var _this29 = this129;
+	var _this29 = this30;
 	if(__map_reserved["ine"] != null) {
 		_this29.setReserved("ine",v29);
 	} else {
 		_this29.h["ine"] = v29;
 	}
-	var this130 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this31 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v30 = new openfl_utils__$AGALMiniAssembler_OpCode("ifg",2,30,897);
-	var _this30 = this130;
+	var _this30 = this31;
 	if(__map_reserved["ifg"] != null) {
 		_this30.setReserved("ifg",v30);
 	} else {
 		_this30.h["ifg"] = v30;
 	}
-	var this131 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this32 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v31 = new openfl_utils__$AGALMiniAssembler_OpCode("ifl",2,31,897);
-	var _this31 = this131;
+	var _this31 = this32;
 	if(__map_reserved["ifl"] != null) {
 		_this31.setReserved("ifl",v31);
 	} else {
 		_this31.h["ifl"] = v31;
 	}
-	var this132 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this33 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v32 = new openfl_utils__$AGALMiniAssembler_OpCode("els",0,32,1921);
-	var _this32 = this132;
+	var _this32 = this33;
 	if(__map_reserved["els"] != null) {
 		_this32.setReserved("els",v32);
 	} else {
 		_this32.h["els"] = v32;
 	}
-	var this133 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this34 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v33 = new openfl_utils__$AGALMiniAssembler_OpCode("eif",0,33,1409);
-	var _this33 = this133;
+	var _this33 = this34;
 	if(__map_reserved["eif"] != null) {
 		_this33.setReserved("eif",v33);
 	} else {
 		_this33.h["eif"] = v33;
 	}
-	var this134 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this35 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v34 = new openfl_utils__$AGALMiniAssembler_OpCode("kil",1,39,160);
-	var _this34 = this134;
+	var _this34 = this35;
 	if(__map_reserved["kil"] != null) {
 		_this34.setReserved("kil",v34);
 	} else {
 		_this34.h["kil"] = v34;
 	}
-	var this135 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this36 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v35 = new openfl_utils__$AGALMiniAssembler_OpCode("tex",3,40,40);
-	var _this35 = this135;
+	var _this35 = this36;
 	if(__map_reserved["tex"] != null) {
 		_this35.setReserved("tex",v35);
 	} else {
 		_this35.h["tex"] = v35;
 	}
-	var this136 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this37 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v36 = new openfl_utils__$AGALMiniAssembler_OpCode("sge",3,41,0);
-	var _this36 = this136;
+	var _this36 = this37;
 	if(__map_reserved["sge"] != null) {
 		_this36.setReserved("sge",v36);
 	} else {
 		_this36.h["sge"] = v36;
 	}
-	var this137 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this38 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v37 = new openfl_utils__$AGALMiniAssembler_OpCode("slt",3,42,0);
-	var _this37 = this137;
+	var _this37 = this38;
 	if(__map_reserved["slt"] != null) {
 		_this37.setReserved("slt",v37);
 	} else {
 		_this37.h["slt"] = v37;
 	}
-	var this138 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this39 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v38 = new openfl_utils__$AGALMiniAssembler_OpCode("sgn",2,43,0);
-	var _this38 = this138;
+	var _this38 = this39;
 	if(__map_reserved["sgn"] != null) {
 		_this38.setReserved("sgn",v38);
 	} else {
 		_this38.h["sgn"] = v38;
 	}
-	var this139 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this40 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v39 = new openfl_utils__$AGALMiniAssembler_OpCode("seq",3,44,0);
-	var _this39 = this139;
+	var _this39 = this40;
 	if(__map_reserved["seq"] != null) {
 		_this39.setReserved("seq",v39);
 	} else {
 		_this39.h["seq"] = v39;
 	}
-	var this140 = openfl_utils_AGALMiniAssembler.OPMAP;
+	var this41 = openfl_utils_AGALMiniAssembler.OPMAP;
 	var v40 = new openfl_utils__$AGALMiniAssembler_OpCode("sne",3,45,0);
-	var _this40 = this140;
+	var _this40 = this41;
 	if(__map_reserved["sne"] != null) {
 		_this40.setReserved("sne",v40);
 	} else {
 		_this40.h["sne"] = v40;
 	}
-	var this141 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this42 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v41 = new openfl_utils__$AGALMiniAssembler_Sampler("rgba",8,0);
-	var _this41 = this141;
+	var _this41 = this42;
 	if(__map_reserved["rgba"] != null) {
 		_this41.setReserved("rgba",v41);
 	} else {
 		_this41.h["rgba"] = v41;
 	}
-	var this142 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this43 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v42 = new openfl_utils__$AGALMiniAssembler_Sampler("compressed",8,1);
-	var _this42 = this142;
+	var _this42 = this43;
 	if(__map_reserved["compressed"] != null) {
 		_this42.setReserved("compressed",v42);
 	} else {
 		_this42.h["compressed"] = v42;
 	}
-	var this143 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this44 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v43 = new openfl_utils__$AGALMiniAssembler_Sampler("compressedalpha",8,2);
-	var _this43 = this143;
+	var _this43 = this44;
 	if(__map_reserved["compressedalpha"] != null) {
 		_this43.setReserved("compressedalpha",v43);
 	} else {
 		_this43.h["compressedalpha"] = v43;
 	}
-	var this144 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this45 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v44 = new openfl_utils__$AGALMiniAssembler_Sampler("dxt1",8,1);
-	var _this44 = this144;
+	var _this44 = this45;
 	if(__map_reserved["dxt1"] != null) {
 		_this44.setReserved("dxt1",v44);
 	} else {
 		_this44.h["dxt1"] = v44;
 	}
-	var this145 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this46 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v45 = new openfl_utils__$AGALMiniAssembler_Sampler("dxt5",8,2);
-	var _this45 = this145;
+	var _this45 = this46;
 	if(__map_reserved["dxt5"] != null) {
 		_this45.setReserved("dxt5",v45);
 	} else {
 		_this45.h["dxt5"] = v45;
 	}
-	var this146 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this47 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v46 = new openfl_utils__$AGALMiniAssembler_Sampler("video",8,3);
-	var _this46 = this146;
+	var _this46 = this47;
 	if(__map_reserved["video"] != null) {
 		_this46.setReserved("video",v46);
 	} else {
 		_this46.h["video"] = v46;
 	}
-	var this147 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this48 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v47 = new openfl_utils__$AGALMiniAssembler_Sampler("2d",12,0);
-	var _this47 = this147;
+	var _this47 = this48;
 	if(__map_reserved["2d"] != null) {
 		_this47.setReserved("2d",v47);
 	} else {
 		_this47.h["2d"] = v47;
 	}
-	var this148 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this49 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v48 = new openfl_utils__$AGALMiniAssembler_Sampler("3d",12,2);
-	var _this48 = this148;
+	var _this48 = this49;
 	if(__map_reserved["3d"] != null) {
 		_this48.setReserved("3d",v48);
 	} else {
 		_this48.h["3d"] = v48;
 	}
-	var this149 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this50 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v49 = new openfl_utils__$AGALMiniAssembler_Sampler("cube",12,1);
-	var _this49 = this149;
+	var _this49 = this50;
 	if(__map_reserved["cube"] != null) {
 		_this49.setReserved("cube",v49);
 	} else {
 		_this49.h["cube"] = v49;
 	}
-	var this150 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this51 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v50 = new openfl_utils__$AGALMiniAssembler_Sampler("mipnearest",24,1);
-	var _this50 = this150;
+	var _this50 = this51;
 	if(__map_reserved["mipnearest"] != null) {
 		_this50.setReserved("mipnearest",v50);
 	} else {
 		_this50.h["mipnearest"] = v50;
 	}
-	var this151 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this52 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v51 = new openfl_utils__$AGALMiniAssembler_Sampler("miplinear",24,2);
-	var _this51 = this151;
+	var _this51 = this52;
 	if(__map_reserved["miplinear"] != null) {
 		_this51.setReserved("miplinear",v51);
 	} else {
 		_this51.h["miplinear"] = v51;
 	}
-	var this152 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this53 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v52 = new openfl_utils__$AGALMiniAssembler_Sampler("mipnone",24,0);
-	var _this52 = this152;
+	var _this52 = this53;
 	if(__map_reserved["mipnone"] != null) {
 		_this52.setReserved("mipnone",v52);
 	} else {
 		_this52.h["mipnone"] = v52;
 	}
-	var this153 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this54 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v53 = new openfl_utils__$AGALMiniAssembler_Sampler("nomip",24,0);
-	var _this53 = this153;
+	var _this53 = this54;
 	if(__map_reserved["nomip"] != null) {
 		_this53.setReserved("nomip",v53);
 	} else {
 		_this53.h["nomip"] = v53;
 	}
-	var this154 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this55 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v54 = new openfl_utils__$AGALMiniAssembler_Sampler("nearest",28,0);
-	var _this54 = this154;
+	var _this54 = this55;
 	if(__map_reserved["nearest"] != null) {
 		_this54.setReserved("nearest",v54);
 	} else {
 		_this54.h["nearest"] = v54;
 	}
-	var this155 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this56 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v55 = new openfl_utils__$AGALMiniAssembler_Sampler("linear",28,1);
-	var _this55 = this155;
+	var _this55 = this56;
 	if(__map_reserved["linear"] != null) {
 		_this55.setReserved("linear",v55);
 	} else {
 		_this55.h["linear"] = v55;
 	}
-	var this156 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this57 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v56 = new openfl_utils__$AGALMiniAssembler_Sampler("anisotropic2x",28,2);
-	var _this56 = this156;
+	var _this56 = this57;
 	if(__map_reserved["anisotropic2x"] != null) {
 		_this56.setReserved("anisotropic2x",v56);
 	} else {
 		_this56.h["anisotropic2x"] = v56;
 	}
-	var this157 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this58 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v57 = new openfl_utils__$AGALMiniAssembler_Sampler("anisotropic4x",28,3);
-	var _this57 = this157;
+	var _this57 = this58;
 	if(__map_reserved["anisotropic4x"] != null) {
 		_this57.setReserved("anisotropic4x",v57);
 	} else {
 		_this57.h["anisotropic4x"] = v57;
 	}
-	var this158 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this59 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v58 = new openfl_utils__$AGALMiniAssembler_Sampler("anisotropic8x",28,4);
-	var _this58 = this158;
+	var _this58 = this59;
 	if(__map_reserved["anisotropic8x"] != null) {
 		_this58.setReserved("anisotropic8x",v58);
 	} else {
 		_this58.h["anisotropic8x"] = v58;
 	}
-	var this159 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this60 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v59 = new openfl_utils__$AGALMiniAssembler_Sampler("anisotropic16x",28,5);
-	var _this59 = this159;
+	var _this59 = this60;
 	if(__map_reserved["anisotropic16x"] != null) {
 		_this59.setReserved("anisotropic16x",v59);
 	} else {
 		_this59.h["anisotropic16x"] = v59;
 	}
-	var this160 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this61 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v60 = new openfl_utils__$AGALMiniAssembler_Sampler("centroid",16,1);
-	var _this60 = this160;
+	var _this60 = this61;
 	if(__map_reserved["centroid"] != null) {
 		_this60.setReserved("centroid",v60);
 	} else {
 		_this60.h["centroid"] = v60;
 	}
-	var this161 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this62 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v61 = new openfl_utils__$AGALMiniAssembler_Sampler("single",16,2);
-	var _this61 = this161;
+	var _this61 = this62;
 	if(__map_reserved["single"] != null) {
 		_this61.setReserved("single",v61);
 	} else {
 		_this61.h["single"] = v61;
 	}
-	var this162 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this63 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v62 = new openfl_utils__$AGALMiniAssembler_Sampler("ignoresampler",16,4);
-	var _this62 = this162;
+	var _this62 = this63;
 	if(__map_reserved["ignoresampler"] != null) {
 		_this62.setReserved("ignoresampler",v62);
 	} else {
 		_this62.h["ignoresampler"] = v62;
 	}
-	var this163 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this64 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v63 = new openfl_utils__$AGALMiniAssembler_Sampler("repeat",20,1);
-	var _this63 = this163;
+	var _this63 = this64;
 	if(__map_reserved["repeat"] != null) {
 		_this63.setReserved("repeat",v63);
 	} else {
 		_this63.h["repeat"] = v63;
 	}
-	var this164 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this65 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v64 = new openfl_utils__$AGALMiniAssembler_Sampler("wrap",20,1);
-	var _this64 = this164;
+	var _this64 = this65;
 	if(__map_reserved["wrap"] != null) {
 		_this64.setReserved("wrap",v64);
 	} else {
 		_this64.h["wrap"] = v64;
 	}
-	var this165 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this66 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v65 = new openfl_utils__$AGALMiniAssembler_Sampler("clamp",20,0);
-	var _this65 = this165;
+	var _this65 = this66;
 	if(__map_reserved["clamp"] != null) {
 		_this65.setReserved("clamp",v65);
 	} else {
 		_this65.h["clamp"] = v65;
 	}
-	var this166 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this67 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v66 = new openfl_utils__$AGALMiniAssembler_Sampler("clamp_u_repeat_v",20,2);
-	var _this66 = this166;
+	var _this66 = this67;
 	if(__map_reserved["clamp_u_repeat_v"] != null) {
 		_this66.setReserved("clamp_u_repeat_v",v66);
 	} else {
 		_this66.h["clamp_u_repeat_v"] = v66;
 	}
-	var this167 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
+	var this68 = openfl_utils_AGALMiniAssembler.SAMPLEMAP;
 	var v67 = new openfl_utils__$AGALMiniAssembler_Sampler("repeat_u_clamp_v",20,3);
-	var _this67 = this167;
+	var _this67 = this68;
 	if(__map_reserved["repeat_u_clamp_v"] != null) {
 		_this67.setReserved("repeat_u_clamp_v",v67);
 	} else {
@@ -84077,8 +84351,8 @@ openfl_utils_AGALMiniAssembler.prototype = {
 					regidx = Std.parseInt(idxmatch[0]);
 				}
 				if(_$UInt_UInt_$Impl_$.gt(regidx,regFound.range)) {
-					var this11 = regFound.range + 1;
-					this.error = "error: register operand " + j + " (" + regs[j] + ") index exceeds limit of " + Std.string(this11 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this11)) + ".";
+					var this2 = regFound.range + 1;
+					this.error = "error: register operand " + j + " (" + regs[j] + ") index exceeds limit of " + Std.string(this2 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this2)) + ".";
 					badreg = true;
 					break;
 				}
@@ -84263,135 +84537,135 @@ openfl_utils_AGALMiniAssembler.prototype = {
 		} else {
 			_this.h["va"] = v;
 		}
-		var this11 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this2 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v1 = new openfl_utils__$AGALMiniAssembler_Register("vc","vertex constant",1,ignorelimits ? 1024 : version == 1 ? 127 : 249,66);
-		var _this1 = this11;
+		var _this1 = this2;
 		if(__map_reserved["vc"] != null) {
 			_this1.setReserved("vc",v1);
 		} else {
 			_this1.h["vc"] = v1;
 		}
-		var this12 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this3 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v2 = new openfl_utils__$AGALMiniAssembler_Register("vt","vertex temporary",2,ignorelimits ? 1024 : version == 1 ? 7 : 25,67);
-		var _this2 = this12;
+		var _this2 = this3;
 		if(__map_reserved["vt"] != null) {
 			_this2.setReserved("vt",v2);
 		} else {
 			_this2.h["vt"] = v2;
 		}
-		var this13 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this4 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v3 = new openfl_utils__$AGALMiniAssembler_Register("vo","vertex output",3,ignorelimits ? 1024 : 0,65);
-		var _this3 = this13;
+		var _this3 = this4;
 		if(__map_reserved["vo"] != null) {
 			_this3.setReserved("vo",v3);
 		} else {
 			_this3.h["vo"] = v3;
 		}
-		var this14 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this5 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v4 = new openfl_utils__$AGALMiniAssembler_Register("vi","varying",4,ignorelimits ? 1024 : version == 1 ? 7 : 9,99);
-		var _this4 = this14;
+		var _this4 = this5;
 		if(__map_reserved["vi"] != null) {
 			_this4.setReserved("vi",v4);
 		} else {
 			_this4.h["vi"] = v4;
 		}
-		var this15 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this6 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v5 = new openfl_utils__$AGALMiniAssembler_Register("fc","fragment constant",1,ignorelimits ? 1024 : version == 1 ? 27 : version == 2 ? 63 : 199,34);
-		var _this5 = this15;
+		var _this5 = this6;
 		if(__map_reserved["fc"] != null) {
 			_this5.setReserved("fc",v5);
 		} else {
 			_this5.h["fc"] = v5;
 		}
-		var this16 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this7 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v6 = new openfl_utils__$AGALMiniAssembler_Register("ft","fragment temporary",2,ignorelimits ? 1024 : version == 1 ? 7 : 25,35);
-		var _this6 = this16;
+		var _this6 = this7;
 		if(__map_reserved["ft"] != null) {
 			_this6.setReserved("ft",v6);
 		} else {
 			_this6.h["ft"] = v6;
 		}
-		var this17 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this8 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v7 = new openfl_utils__$AGALMiniAssembler_Register("fs","texture sampler",5,ignorelimits ? 1024 : 7,34);
-		var _this7 = this17;
+		var _this7 = this8;
 		if(__map_reserved["fs"] != null) {
 			_this7.setReserved("fs",v7);
 		} else {
 			_this7.h["fs"] = v7;
 		}
-		var this18 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this9 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v8 = new openfl_utils__$AGALMiniAssembler_Register("fo","fragment output",3,ignorelimits ? 1024 : version == 1 ? 0 : 3,33);
-		var _this8 = this18;
+		var _this8 = this9;
 		if(__map_reserved["fo"] != null) {
 			_this8.setReserved("fo",v8);
 		} else {
 			_this8.h["fo"] = v8;
 		}
-		var this19 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this10 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v9 = new openfl_utils__$AGALMiniAssembler_Register("fd","fragment depth output",6,ignorelimits ? 1024 : version == 1 ? -1 : 0,33);
-		var _this9 = this19;
+		var _this9 = this10;
 		if(__map_reserved["fd"] != null) {
 			_this9.setReserved("fd",v9);
 		} else {
 			_this9.h["fd"] = v9;
 		}
-		var this110 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this11 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v10 = new openfl_utils__$AGALMiniAssembler_Register("iid","instance id",7,ignorelimits ? 1024 : 0,66);
-		var _this10 = this110;
+		var _this10 = this11;
 		if(__map_reserved["iid"] != null) {
 			_this10.setReserved("iid",v10);
 		} else {
 			_this10.h["iid"] = v10;
 		}
-		var this111 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this12 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this11 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v11 = __map_reserved["vo"] != null ? _this11.getReserved("vo") : _this11.h["vo"];
-		var _this12 = this111;
+		var _this12 = this12;
 		if(__map_reserved["op"] != null) {
 			_this12.setReserved("op",v11);
 		} else {
 			_this12.h["op"] = v11;
 		}
-		var this112 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this13 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this13 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v12 = __map_reserved["vi"] != null ? _this13.getReserved("vi") : _this13.h["vi"];
-		var _this14 = this112;
+		var _this14 = this13;
 		if(__map_reserved["i"] != null) {
 			_this14.setReserved("i",v12);
 		} else {
 			_this14.h["i"] = v12;
 		}
-		var this113 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this14 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this15 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v13 = __map_reserved["vi"] != null ? _this15.getReserved("vi") : _this15.h["vi"];
-		var _this16 = this113;
+		var _this16 = this14;
 		if(__map_reserved["v"] != null) {
 			_this16.setReserved("v",v13);
 		} else {
 			_this16.h["v"] = v13;
 		}
-		var this114 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this15 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this17 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v14 = __map_reserved["fo"] != null ? _this17.getReserved("fo") : _this17.h["fo"];
-		var _this18 = this114;
+		var _this18 = this15;
 		if(__map_reserved["oc"] != null) {
 			_this18.setReserved("oc",v14);
 		} else {
 			_this18.h["oc"] = v14;
 		}
-		var this115 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this16 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this19 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v15 = __map_reserved["fd"] != null ? _this19.getReserved("fd") : _this19.h["fd"];
-		var _this20 = this115;
+		var _this20 = this16;
 		if(__map_reserved["od"] != null) {
 			_this20.setReserved("od",v15);
 		} else {
 			_this20.h["od"] = v15;
 		}
-		var this116 = openfl_utils_AGALMiniAssembler.REGMAP;
+		var this17 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var _this21 = openfl_utils_AGALMiniAssembler.REGMAP;
 		var v16 = __map_reserved["vi"] != null ? _this21.getReserved("vi") : _this21.h["vi"];
-		var _this22 = this116;
+		var _this22 = this17;
 		if(__map_reserved["fi"] != null) {
 			_this22.setReserved("fi",v16);
 		} else {
@@ -84447,10 +84721,10 @@ openfl_utils__$AGALMiniAssembler_Register.prototype = {
 	,toString: function() {
 		var this1 = this.emitCode;
 		var tmp = "[Register name=\"" + this.name + "\", longName=\"" + this.longName + "\", emitCode=" + Std.string(this1 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this1)) + ", range=";
-		var this11 = this.range;
-		var tmp1 = tmp + Std.string(this11 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this11)) + ", flags=";
-		var this12 = this.flags;
-		return tmp1 + Std.string(this12 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this12)) + "]";
+		var this2 = this.range;
+		var tmp1 = tmp + Std.string(this2 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this2)) + ", flags=";
+		var this3 = this.flags;
+		return tmp1 + Std.string(this3 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this3)) + "]";
 	}
 	,__class__: openfl_utils__$AGALMiniAssembler_Register
 };
@@ -84468,8 +84742,8 @@ openfl_utils__$AGALMiniAssembler_Sampler.prototype = {
 	,toString: function() {
 		var this1 = this.flag;
 		var tmp = "[Sampler name=\"" + this.name + "\", flag=\"" + Std.string(this1 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this1)) + "\", mask=";
-		var this11 = this.mask;
-		return tmp + Std.string(this11 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this11)) + "]";
+		var this2 = this.mask;
+		return tmp + Std.string(this2 == null ? null : _$UInt_UInt_$Impl_$.toFloat(this2)) + "]";
 	}
 	,__class__: openfl_utils__$AGALMiniAssembler_Sampler
 };
@@ -85349,7 +85623,7 @@ openfl_utils_ByteArrayData.unwrapAMF3Value = function(val) {
 		}
 		return obj;
 	case 8:
-		var _g9 = val.extra;
+		var _g11 = val.extra;
 		var vals = val.values;
 		var f1 = openfl_utils_ByteArrayData.unwrapAMF3Value;
 		var result = new Array(vals.length);
@@ -85364,12 +85638,12 @@ openfl_utils_ByteArrayData.unwrapAMF3Value = function(val) {
 		var vals1 = val.values;
 		var f2 = openfl_utils_ByteArrayData.unwrapAMF3Value;
 		var length = vals1.length;
-		var this2 = new Array(length);
-		var r = this2;
+		var this1 = new Array(length);
+		var r = this1;
 		var len = length;
 		var _g2 = 0;
-		var _g11 = len;
-		while(_g2 < _g11) {
+		var _g12 = len;
+		while(_g2 < _g12) {
 			var i1 = _g2++;
 			var v = f2(vals1[i1]);
 			r[i1] = v;
@@ -85390,7 +85664,7 @@ openfl_utils_ByteArrayData.unwrapAMF3Value = function(val) {
 			if(map == null) {
 				switch(key1._hx_index) {
 				case 3:
-					var _g12 = key1.i;
+					var _g13 = key1.i;
 					map = new haxe_ds_IntMap();
 					break;
 				case 5:
@@ -87286,8 +87560,11 @@ var init = lime__$internal_backend_html5_HTML5Application;
 var init = lime_app_Application;
 var __map_reserved = {};
 haxe_ds_ObjectMap.count = 0;
-$hxClasses["Math"] = Math;
 if( String.fromCodePoint == null ) String.fromCodePoint = function(c) { return c < 0x10000 ? String.fromCharCode(c) : String.fromCharCode((c>>10)+0xD7C0)+String.fromCharCode((c&0x3FF)+0xDC00); }
+Object.defineProperty(js__$Boot_HaxeError.prototype,"message",{ get : function() {
+	return String(this.val);
+}});
+$hxClasses["Math"] = Math;
 String.prototype.__class__ = $hxClasses["String"] = String;
 String.__name__ = "String";
 $hxClasses["Array"] = Array;
@@ -87300,9 +87577,6 @@ var Float = Number;
 var Bool = Boolean;
 var Class = { };
 var Enum = { };
-Object.defineProperty(js__$Boot_HaxeError.prototype,"message",{ get : function() {
-	return String(this.val);
-}});
 js_Boot.__toStr = ({ }).toString;
 if(ArrayBuffer.prototype.slice == null) {
 	ArrayBuffer.prototype.slice = js_lib__$ArrayBuffer_ArrayBufferCompat.sliceImpl;
@@ -87361,8 +87635,11 @@ openfl_display_DisplayObject.__tempStack = new lime_utils_ObjectPool(function() 
 	stack.set_length(0);
 });
 openfl_text_TextField.__missingFontWarning = new haxe_ds_StringMap();
-GameBalloon.MIN_NUMBER = 1;
-GameBalloon.MAX_NUMBER = 12;
+openfl_net_SharedObject.defaultObjectEncoding = 10;
+openfl_errors_Error.DEFAULT_TO_STRING = "Error";
+haxe_Unserializer.DEFAULT_RESOLVER = new haxe__$Unserializer_DefaultResolver();
+haxe_Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
+GameBalloonConfig.config = openfl_net_SharedObject.getLocal("GameBalloon");
 openfl_text_Font.__fontByName = new haxe_ds_StringMap();
 openfl_text_Font.__registeredFonts = [];
 Xml.Element = 0;
@@ -87448,8 +87725,6 @@ format_amf3_Amf3Array.__meta__ = { fields : { extra : { optional : null}}};
 haxe_Serializer.USE_CACHE = false;
 haxe_Serializer.USE_ENUM_INDEX = false;
 haxe_Serializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
-haxe_Unserializer.DEFAULT_RESOLVER = new haxe__$Unserializer_DefaultResolver();
-haxe_Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
 haxe_io_FPHelper.i64tmp = (function($this) {
@@ -89302,7 +89577,6 @@ openfl_display3D_Uniform.__meta__ = { obj : { SuppressWarnings : ["checkstyle:Fi
 openfl_display3D_UniformMap.__meta__ = { obj : { SuppressWarnings : ["checkstyle:FieldDocComment"]}};
 openfl_display3D_textures_TextureBase.__meta__ = { fields : { __textureContext : { SuppressWarnings : ["checkstyle:Dynamic"]}, __getGLFramebuffer : { SuppressWarnings : ["checkstyle:Dynamic"]}}};
 openfl_display3D_textures_Texture.__lowMemoryMode = false;
-openfl_errors_Error.DEFAULT_TO_STRING = "Error";
 openfl_events_ActivityEvent.ACTIVITY = "activity";
 openfl_events_ActivityEvent.__pool = new lime_utils_ObjectPool(function() {
 	return new openfl_events_ActivityEvent(null);
@@ -89463,6 +89737,8 @@ openfl_media_SoundMixer.__soundTransform = new openfl_media_SoundTransform();
 openfl_net_NetConnection.__meta__ = { statics : { CONNECT_SUCCESS : { SuppressWarnings : ["checkstyle:FieldDocComment"]}}};
 openfl_net_NetConnection.CONNECT_SUCCESS = "NetConnection.Connect.Success";
 openfl_net_NetStream.__meta__ = { fields : { audioCodec : { SuppressWarnings : ["checkstyle:FieldDocComment"]}, decodedFrames : { SuppressWarnings : ["checkstyle:FieldDocComment"]}, speed : { SuppressWarnings : ["checkstyle:FieldDocComment"]}, requestVideoStatus : { SuppressWarnings : ["checkstyle:FieldDocComment"]}}};
+openfl_net__$SharedObjectFlushStatus_SharedObjectFlushStatus_$Impl_$.FLUSHED = 0;
+openfl_net__$SharedObjectFlushStatus_SharedObjectFlushStatus_$Impl_$.PENDING = 1;
 openfl_net__$URLLoaderDataFormat_URLLoaderDataFormat_$Impl_$.BINARY = 0;
 openfl_net__$URLLoaderDataFormat_URLLoaderDataFormat_$Impl_$.TEXT = 1;
 openfl_net__$URLLoaderDataFormat_URLLoaderDataFormat_$Impl_$.VARIABLES = 2;
