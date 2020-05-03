@@ -894,9 +894,9 @@ ApplicationMain.create = function(config) {
 	ManifestResources.init(config);
 	var _this = app.meta;
 	if(__map_reserved["build"] != null) {
-		_this.setReserved("build","22");
+		_this.setReserved("build","23");
 	} else {
-		_this.h["build"] = "22";
+		_this.h["build"] = "23";
 	}
 	var _this1 = app.meta;
 	if(__map_reserved["company"] != null) {
@@ -4592,7 +4592,7 @@ DocumentClass.prototype = $extend(Main.prototype,{
 });
 var Balloon = function(text) {
 	this.popped = false;
-	this.soundPop = openfl_utils_Assets.getSound("assets/sounds/eventually.mp3");
+	this.soundPop = openfl_utils_Assets.getSound("assets/sounds/eventually.wav");
 	openfl_display_Sprite.call(this);
 	this.text = text;
 	this.sound = openfl_utils_Assets.getSound("assets/sounds/" + text.toLowerCase() + ".wav");
@@ -7201,7 +7201,7 @@ hacksaw_Scene.prototype = $extend(openfl_display_Sprite.prototype,{
 });
 var GameScene = function() {
 	this.interactable = true;
-	this.soundFinish = openfl_utils_Assets.getSound("assets/sounds/kids_cheering.mp3");
+	this.soundFinish = openfl_utils_Assets.getSound("assets/sounds/kids_cheering.wav");
 	hacksaw_Scene.call(this);
 	this.opaqueBackground = 51;
 };
@@ -7236,13 +7236,13 @@ GameScene.prototype = $extend(hacksaw_Scene.prototype,{
 		tf.set_text("X");
 		tf.set_x(0);
 		tf.set_y(0);
-		tf.addEventListener("click",$bind(this,this.closeGame));
+		tf.addEventListener("mouseDown",$bind(this,this.closeGame));
 		this.addChild(tf);
 		tf = new DefaultTextField();
 		tf.set_text("C");
 		tf.set_x(openfl_Lib.get_current().stage.stageWidth - tf.get_width() - 5);
 		tf.set_y(0);
-		tf.addEventListener("click",function(e) {
+		tf.addEventListener("mouseDown",function(e) {
 			hacksaw_SceneManager.push(hacksaw_SceneManager.get().getCurrentSceneName() + "Config");
 		});
 		this.addChild(tf);
@@ -7354,7 +7354,7 @@ GameBalloon.prototype = $extend(GameScene.prototype,{
 		var i = this.config.data.maxNumber;
 		while(i >= this.config.data.minNumber) {
 			var balloon = new Balloon("" + i);
-			balloon.addEventListener("click",$bind(this,this.clickNumber));
+			balloon.addEventListener("mouseDown",$bind(this,this.clickNumber));
 			this.balloonGroup.addChild(balloon);
 			this.balloons.h[i] = balloon;
 			--i;
@@ -8278,7 +8278,7 @@ GameBalloonConfig.prototype = $extend(hacksaw_Scene.prototype,{
 		rows.set_layout(new feathers_layout_VerticalLayout());
 		this.addChild(rows);
 		var tf = this.newTextField("<- Back");
-		tf.addEventListener("click",function(e) {
+		tf.addEventListener("mouseDown",function(e) {
 			_gthis.saveAndClose();
 			return;
 		});
@@ -8381,9 +8381,9 @@ GameLamp.prototype = $extend(GameScene.prototype,{
 			balloon.set_x(x);
 			balloon.set_y((openfl_Lib.get_current().stage.stageHeight - balloon.get_height()) / 2);
 			if(balloon.get_number() == this.currentNumber) {
-				balloon.addEventListener("click",$bind(this,this.pop));
+				balloon.addEventListener("mouseDown",$bind(this,this.pop));
 			} else {
-				balloon.addEventListener("click",$bind(this,this.say));
+				balloon.addEventListener("mouseDown",$bind(this,this.say));
 			}
 			this.addChild(balloon);
 			x += 200;
@@ -8464,7 +8464,7 @@ GameReading.prototype = $extend(GameScene.prototype,{
 });
 var GameShapes = function() {
 	this.particleTap = org_zamedev_particles_loaders_ParticleLoader.load("assets/particles/dust.plist");
-	this.soundPop = openfl_utils_Assets.getSound("assets/sounds/eventually.mp3");
+	this.soundPop = openfl_utils_Assets.getSound("assets/sounds/eventually.wav");
 	this.soundWhere = openfl_utils_Assets.getSound("assets/sounds/where-the.wav");
 	this.creator = new SpriteCreator();
 	GameScene.call(this);
@@ -8494,7 +8494,7 @@ GameShapes.prototype = $extend(GameScene.prototype,{
 					return;
 				};
 			})(s);
-			s[0].addEventListener("click",tmp);
+			s[0].addEventListener("mouseDown",tmp);
 		}
 		this.chooser = new RandomChooser(sprites);
 		this.addExitButton();
@@ -8508,42 +8508,43 @@ GameShapes.prototype = $extend(GameScene.prototype,{
 		if(!this.interactable) {
 			return;
 		}
-		var tmp = this.chooser.current();
-		if(sprite == tmp) {
+		var correct = sprite == this.chooser.current();
+		if(correct) {
 			this.soundPop.play();
+			this.emitParticles(sprite);
 			this.removeChild(sprite);
-			var deltaX = sprite.get_width() / 5;
-			var deltaY = sprite.get_height() / 5;
-			var centerX = sprite.get_x() + sprite.get_width() / 2;
-			var centerY = sprite.get_y() + sprite.get_width() / 2;
-			haxe_Timer.delay(function() {
-				_gthis.particleTap.emit(centerX - deltaX,centerY);
-			},0);
-			haxe_Timer.delay(function() {
-				_gthis.particleTap.emit(centerX + deltaX,centerY);
-			},50);
-			haxe_Timer.delay(function() {
-				_gthis.particleTap.emit(centerX,centerY - deltaY);
-			},100);
-			haxe_Timer.delay(function() {
-				_gthis.particleTap.emit(centerX,centerY + deltaY);
-			},150);
 		}
 		this.playSoundsInSequence([sprite.soundColor,sprite.soundShape],function() {
-			var tmp1 = _gthis.chooser.current();
-			if(sprite == tmp1) {
+			if(correct) {
 				_gthis.chooser.next();
 				_gthis.askPlayer();
 			}
 		});
 	}
 	,askPlayer: function() {
-		if(this.chooser.finished()) {
-			this.finishWithSuccess();
-		} else {
+		if(!this.chooser.finished()) {
 			var shape = this.chooser.current();
 			this.playSoundsInSequence([this.soundWhere,shape.soundColor,shape.soundShape,500]);
 		}
+	}
+	,emitParticles: function(sprite) {
+		var _gthis = this;
+		var deltaX = sprite.get_width() / 5;
+		var deltaY = sprite.get_height() / 5;
+		var centerX = sprite.get_x() + sprite.get_width() / 2;
+		var centerY = sprite.get_y() + sprite.get_width() / 2;
+		haxe_Timer.delay(function() {
+			_gthis.particleTap.emit(centerX - deltaX,centerY);
+		},0);
+		haxe_Timer.delay(function() {
+			_gthis.particleTap.emit(centerX + deltaX,centerY);
+		},50);
+		haxe_Timer.delay(function() {
+			_gthis.particleTap.emit(centerX,centerY - deltaY);
+		},100);
+		haxe_Timer.delay(function() {
+			_gthis.particleTap.emit(centerX,centerY + deltaY);
+		},150);
 	}
 	,__class__: GameShapes
 });
@@ -8677,7 +8678,7 @@ GameZoombini.prototype = $extend(GameScene.prototype,{
 				var color = _g11[_g2];
 				++_g2;
 				var obj = new Shape(shape,color);
-				obj.addEventListener("click",$bind(this,this.clickShape));
+				obj.addEventListener("mouseDown",$bind(this,this.clickShape));
 				obj.set_x(x * 250 + 200);
 				obj.set_y(y * 200 + 80);
 				this.addChild(obj);
@@ -8804,17 +8805,17 @@ MainMenu.prototype = $extend(hacksaw_Scene.prototype,{
 		this.addChild(group);
 		group.set_layout(new feathers_layout_VerticalLayout());
 		var tf = this.createMenuItem("Play balloons");
-		tf.addEventListener("click",function(e) {
+		tf.addEventListener("mouseDown",function(e) {
 			hacksaw_SceneManager.push("GameBalloon");
 		});
 		group.addChild(tf);
 		tf = this.createMenuItem("Play lamps");
-		tf.addEventListener("click",function(e1) {
+		tf.addEventListener("mouseDown",function(e1) {
 			hacksaw_SceneManager.push("GameLamp");
 		});
 		group.addChild(tf);
 		tf = this.createMenuItem("Play Shapes");
-		tf.addEventListener("click",function(e2) {
+		tf.addEventListener("mouseDown",function(e2) {
 			hacksaw_SceneManager.push("GameShapes");
 		});
 		group.addChild(tf);
@@ -8853,7 +8854,7 @@ ManifestResources.init = function(config) {
 	openfl_text_Font.registerFont(_$_$ASSET_$_$OPENFL_$_$assets_$fonts_$verdana_$bold_$ttf);
 	openfl_text_Font.registerFont(_$_$ASSET_$_$OPENFL_$_$assets_$fonts_$verdana_$bold_$ttf1);
 	var bundle;
-	var data = "{\"name\":null,\"assets\":\"aoy4:pathy33:assets%2Fimages%2Fballoon-red.pngy4:sizei6989y4:typey5:IMAGEy2:idR1y7:preloadtgoR0y34:assets%2Fimages%2Fballoon-blue.pngR2i7032R3R4R5R7R6tgoR0y34:assets%2Fimages%2Fballoon-pink.pngR2i7070R3R4R5R8R6tgoR0y32:assets%2Fimages%2Fcircle-red.pngR2i3435R3R4R5R9R6tgoR0y35:assets%2Fimages%2Fsquare-yellow.pngR2i483R3R4R5R10R6tgoR0y36:assets%2Fimages%2Fballoon-purple.pngR2i7060R3R4R5R11R6tgoR0y35:assets%2Fimages%2Fcircle-yellow.pngR2i3668R3R4R5R12R6tgoR0y35:assets%2Fimages%2Fballoon-green.pngR2i7020R3R4R5R13R6tgoR0y33:assets%2Fimages%2Fcircle-blue.pngR2i4035R3R4R5R14R6tgoR0y30:assets%2Fimages%2Fstar-red.pngR2i4506R3R4R5R15R6tgoR0y33:assets%2Fimages%2Fstar-yellow.pngR2i4405R3R4R5R16R6tgoR0y32:assets%2Fimages%2Fsquare-red.pngR2i477R3R4R5R17R6tgoR0y31:assets%2Fimages%2Fstar-blue.pngR2i5218R3R4R5R18R6tgoR0y33:assets%2Fimages%2Fsquare-blue.pngR2i486R3R4R5R19R6tgoR0y34:assets%2Fparticles%2Fduman-2.plistR2i26500R3y4:TEXTR5R20R6tgoR0y35:assets%2Fparticles%2Fhyperflash.pngR2i35000R3R4R5R22R6tgoR0y29:assets%2Fparticles%2Fdust.pngR2i3803R3R4R5R23R6tgoR0y31:assets%2Fparticles%2Ftrippy.pngR2i2567R3R4R5R24R6tgoR0y33:assets%2Fparticles%2Ftrippy.plistR2i3183R3R21R5R25R6tgoR0y37:assets%2Fparticles%2Fhyperflash.plistR2i3058R3R21R5R26R6tgoR0y31:assets%2Fparticles%2Fdust.plistR2i2987R3R21R5R27R6tgoR0y19:assets%2Fopenfl.pngR2i11126R3R4R5R28R6tgoR2i39316R3y5:SOUNDR5y24:assets%2Fsounds%2F16.wavy9:pathGroupaR30hR6tgoR2i43038R3R29R5y24:assets%2Fsounds%2F17.wavR31aR32hR6tgoR2i23816R3R29R5y26:assets%2Fsounds%2Fblue.wavR31aR33hR6tgoR2i37196R3R29R5y24:assets%2Fsounds%2F15.wavR31aR34hR6tgoR2i43160R3R29R5y31:assets%2Fsounds%2Fidontlike.wavR31aR35hR6tgoR2i53644R3R29R5y27:assets%2Fsounds%2Fwhere.wavR31aR36hR6tgoR2i37632R3R29R5y24:assets%2Fsounds%2F14.wavR31aR37hR6tgoR2i61908R3R29R5y33:assets%2Fsounds%2Fgivemeshape.wavR31aR38hR6tgoR2i28006R3R29R5y28:assets%2Fsounds%2Fyellow.wavR31aR39hR6tgoR2i20896R3R29R5y24:assets%2Fsounds%2F10.wavR31aR40hR6tgoR2i38948R3R29R5y30:assets%2Fsounds%2Ftriangle.wavR31aR41hR6tgoR2i39460R3R29R5y31:assets%2Fsounds%2Fwhere-the.wavR31aR42hR6tgoR2i28664R3R29R5y24:assets%2Fsounds%2F11.wavR31aR43hR6tgoR2i35112R3R29R5y24:assets%2Fsounds%2F13.wavR31aR44hR6tgoR2i30746R3R29R5y24:assets%2Fsounds%2F12.wavR31aR45hR6tgoR2i29712R3R29R5y28:assets%2Fsounds%2Fcircle.wavR31aR46hR6tgoR2i38882R3R29R5y31:assets%2Fsounds%2Frectangle.wavR31aR47hR6tgoR2i21966R3R29R5y23:assets%2Fsounds%2Fi.wavR31aR48hR6tgoR2i28878R3R29R5y24:assets%2Fsounds%2Fbi.wavR31aR49hR6tgoR2i30030R3R29R5y24:assets%2Fsounds%2Fla.wavR31aR50hR6tgoR2i25138R3R29R5y23:assets%2Fsounds%2F9.wavR31aR51hR6tgoR2i16608R3R29R5y23:assets%2Fsounds%2F8.wavR31aR52hR6tgoR2i28878R3R29R5y24:assets%2Fsounds%2Fbo.wavR31aR53hR6tgoR2i27726R3R29R5y24:assets%2Fsounds%2Fta.wavR31aR54hR6tgoR2i27726R3R29R5y24:assets%2Fsounds%2Fba.wavR31aR55hR6tgoR2i25056R3R29R5y23:assets%2Fsounds%2F6.wavR31aR56hR6tgoR2i27640R3R29R5y26:assets%2Fsounds%2Fstar.wavR31aR57hR6tgoR2i28990R3R29R5y23:assets%2Fsounds%2F7.wavR31aR58hR6tgoR2i28180R3R29R5y23:assets%2Fsounds%2F5.wavR31aR59hR6tgoR2i31182R3R29R5y24:assets%2Fsounds%2Fbu.wavR31aR60hR6tgoR2i30030R3R29R5y24:assets%2Fsounds%2Fna.wavR31aR61hR6tgoR2i24170R3R29R5y23:assets%2Fsounds%2F4.wavR31aR62hR6tgoR2i66499R3y5:MUSICR5y35:assets%2Fsounds%2Fkids_cheering.mp3R31aR64hR6tgoR2i20922R3R29R5y25:assets%2Fsounds%2Fred.wavR31aR65hR6tgoR2i22030R3R29R5y23:assets%2Fsounds%2F1.wavR31aR66hR6tgoR2i28604R3R29R5y28:assets%2Fsounds%2Fsquare.wavR31aR67hR6tgoR2i23294R3R29R5y23:assets%2Fsounds%2F3.wavR31aR68hR6tgoR2i20576R3R29R5y23:assets%2Fsounds%2F2.wavR31aR69hR6tgoR2i30030R3R29R5y24:assets%2Fsounds%2Fbe.wavR31aR70hR6tgoR2i23945R3R63R5y31:assets%2Fsounds%2Fgood-news.mp3R31aR71hR6tgoR2i33018R3R29R5y24:assets%2Fsounds%2F20.wavR31aR72hR6tgoR2i63947R3R63R5y32:assets%2Fsounds%2Feventually.mp3R31aR73hR6tgoR2i99900R3R29R5y27:assets%2Fsounds%2Filike.wavR31aR74hR6tgoR2i38048R3R29R5y24:assets%2Fsounds%2F19.wavR31aR75hR6tgoR2i20814R3R29R5y24:assets%2Fsounds%2Fpa.wavR31aR76hR6tgoR2i26032R3R29R5y24:assets%2Fsounds%2F18.wavR31aR77hR6tgoR2i156340R3y4:FONTy9:classNamey38:__ASSET__assets_fonts_verdana_bold_ttfR5y33:assets%2Ffonts%2Fverdana-bold.ttfR6tgoR2i156340R3R78R79y39:__ASSET__assets_fonts_verdana_bold_ttf1R5R81R6tgh\",\"rootPath\":null,\"version\":2,\"libraryArgs\":[],\"libraryType\":null}";
+	var data = "{\"name\":null,\"assets\":\"aoy4:pathy33:assets%2Fimages%2Fballoon-red.pngy4:sizei6989y4:typey5:IMAGEy2:idR1y7:preloadtgoR0y34:assets%2Fimages%2Fballoon-blue.pngR2i7032R3R4R5R7R6tgoR0y34:assets%2Fimages%2Fballoon-pink.pngR2i7070R3R4R5R8R6tgoR0y32:assets%2Fimages%2Fcircle-red.pngR2i3435R3R4R5R9R6tgoR0y35:assets%2Fimages%2Fsquare-yellow.pngR2i483R3R4R5R10R6tgoR0y36:assets%2Fimages%2Fballoon-purple.pngR2i7060R3R4R5R11R6tgoR0y35:assets%2Fimages%2Fcircle-yellow.pngR2i3668R3R4R5R12R6tgoR0y35:assets%2Fimages%2Fballoon-green.pngR2i7020R3R4R5R13R6tgoR0y33:assets%2Fimages%2Fcircle-blue.pngR2i4035R3R4R5R14R6tgoR0y30:assets%2Fimages%2Fstar-red.pngR2i4506R3R4R5R15R6tgoR0y33:assets%2Fimages%2Fstar-yellow.pngR2i4405R3R4R5R16R6tgoR0y32:assets%2Fimages%2Fsquare-red.pngR2i477R3R4R5R17R6tgoR0y31:assets%2Fimages%2Fstar-blue.pngR2i5218R3R4R5R18R6tgoR0y33:assets%2Fimages%2Fsquare-blue.pngR2i486R3R4R5R19R6tgoR0y34:assets%2Fparticles%2Fduman-2.plistR2i26500R3y4:TEXTR5R20R6tgoR0y35:assets%2Fparticles%2Fhyperflash.pngR2i35000R3R4R5R22R6tgoR0y29:assets%2Fparticles%2Fdust.pngR2i3803R3R4R5R23R6tgoR0y31:assets%2Fparticles%2Ftrippy.pngR2i2567R3R4R5R24R6tgoR0y33:assets%2Fparticles%2Ftrippy.plistR2i3183R3R21R5R25R6tgoR0y37:assets%2Fparticles%2Fhyperflash.plistR2i3058R3R21R5R26R6tgoR0y31:assets%2Fparticles%2Fdust.plistR2i2987R3R21R5R27R6tgoR0y19:assets%2Fopenfl.pngR2i11126R3R4R5R28R6tgoR2i39316R3y5:SOUNDR5y24:assets%2Fsounds%2F16.wavy9:pathGroupaR30hR6tgoR2i43038R3R29R5y24:assets%2Fsounds%2F17.wavR31aR32hR6tgoR2i23816R3R29R5y26:assets%2Fsounds%2Fblue.wavR31aR33hR6tgoR2i723722R3R29R5y35:assets%2Fsounds%2Fkids_cheering.wavR31aR34hR6tgoR2i37196R3R29R5y24:assets%2Fsounds%2F15.wavR31aR35hR6tgoR2i43160R3R29R5y31:assets%2Fsounds%2Fidontlike.wavR31aR36hR6tgoR2i53644R3R29R5y27:assets%2Fsounds%2Fwhere.wavR31aR37hR6tgoR2i37632R3R29R5y24:assets%2Fsounds%2F14.wavR31aR38hR6tgoR2i61908R3R29R5y33:assets%2Fsounds%2Fgivemeshape.wavR31aR39hR6tgoR2i28006R3R29R5y28:assets%2Fsounds%2Fyellow.wavR31aR40hR6tgoR2i20896R3R29R5y24:assets%2Fsounds%2F10.wavR31aR41hR6tgoR2i38948R3R29R5y30:assets%2Fsounds%2Ftriangle.wavR31aR42hR6tgoR2i39460R3R29R5y31:assets%2Fsounds%2Fwhere-the.wavR31aR43hR6tgoR2i28664R3R29R5y24:assets%2Fsounds%2F11.wavR31aR44hR6tgoR2i35112R3R29R5y24:assets%2Fsounds%2F13.wavR31aR45hR6tgoR2i30746R3R29R5y24:assets%2Fsounds%2F12.wavR31aR46hR6tgoR2i29712R3R29R5y28:assets%2Fsounds%2Fcircle.wavR31aR47hR6tgoR2i38882R3R29R5y31:assets%2Fsounds%2Frectangle.wavR31aR48hR6tgoR2i21966R3R29R5y23:assets%2Fsounds%2Fi.wavR31aR49hR6tgoR2i28878R3R29R5y24:assets%2Fsounds%2Fbi.wavR31aR50hR6tgoR2i30030R3R29R5y24:assets%2Fsounds%2Fla.wavR31aR51hR6tgoR2i352590R3R29R5y32:assets%2Fsounds%2Feventually.wavR31aR52hR6tgoR2i25138R3R29R5y23:assets%2Fsounds%2F9.wavR31aR53hR6tgoR2i16608R3R29R5y23:assets%2Fsounds%2F8.wavR31aR54hR6tgoR2i28878R3R29R5y24:assets%2Fsounds%2Fbo.wavR31aR55hR6tgoR2i27726R3R29R5y24:assets%2Fsounds%2Fta.wavR31aR56hR6tgoR2i27726R3R29R5y24:assets%2Fsounds%2Fba.wavR31aR57hR6tgoR2i25056R3R29R5y23:assets%2Fsounds%2F6.wavR31aR58hR6tgoR2i27640R3R29R5y26:assets%2Fsounds%2Fstar.wavR31aR59hR6tgoR2i28990R3R29R5y23:assets%2Fsounds%2F7.wavR31aR60hR6tgoR2i28180R3R29R5y23:assets%2Fsounds%2F5.wavR31aR61hR6tgoR2i31182R3R29R5y24:assets%2Fsounds%2Fbu.wavR31aR62hR6tgoR2i30030R3R29R5y24:assets%2Fsounds%2Fna.wavR31aR63hR6tgoR2i24170R3R29R5y23:assets%2Fsounds%2F4.wavR31aR64hR6tgoR2i20922R3R29R5y25:assets%2Fsounds%2Fred.wavR31aR65hR6tgoR2i22030R3R29R5y23:assets%2Fsounds%2F1.wavR31aR66hR6tgoR2i28604R3R29R5y28:assets%2Fsounds%2Fsquare.wavR31aR67hR6tgoR2i23294R3R29R5y23:assets%2Fsounds%2F3.wavR31aR68hR6tgoR2i20576R3R29R5y23:assets%2Fsounds%2F2.wavR31aR69hR6tgoR2i30030R3R29R5y24:assets%2Fsounds%2Fbe.wavR31aR70hR6tgoR2i23945R3y5:MUSICR5y31:assets%2Fsounds%2Fgood-news.mp3R31aR72hR6tgoR2i33018R3R29R5y24:assets%2Fsounds%2F20.wavR31aR73hR6tgoR2i99900R3R29R5y27:assets%2Fsounds%2Filike.wavR31aR74hR6tgoR2i38048R3R29R5y24:assets%2Fsounds%2F19.wavR31aR75hR6tgoR2i20814R3R29R5y24:assets%2Fsounds%2Fpa.wavR31aR76hR6tgoR2i26032R3R29R5y24:assets%2Fsounds%2F18.wavR31aR77hR6tgoR2i156340R3y4:FONTy9:classNamey38:__ASSET__assets_fonts_verdana_bold_ttfR5y33:assets%2Ffonts%2Fverdana-bold.ttfR6tgoR2i156340R3R78R79y39:__ASSET__assets_fonts_verdana_bold_ttf1R5R81R6tgh\",\"rootPath\":null,\"version\":2,\"libraryArgs\":[],\"libraryType\":null}";
 	var manifest = lime_utils_AssetManifest.parse(data,ManifestResources.rootPath);
 	var library = lime_utils_AssetLibrary.fromManifest(manifest);
 	lime_utils_Assets.registerLibrary("default",library);
