@@ -8,990 +8,6 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var lime_app_IModule = function() { };
-$hxClasses["lime.app.IModule"] = lime_app_IModule;
-lime_app_IModule.__name__ = "lime.app.IModule";
-lime_app_IModule.__isInterface__ = true;
-lime_app_IModule.prototype = {
-	__registerLimeModule: null
-	,__unregisterLimeModule: null
-	,__class__: lime_app_IModule
-};
-var lime_app_Module = function() {
-	this.onExit = new lime_app__$Event_$Int_$Void();
-};
-$hxClasses["lime.app.Module"] = lime_app_Module;
-lime_app_Module.__name__ = "lime.app.Module";
-lime_app_Module.__interfaces__ = [lime_app_IModule];
-lime_app_Module.prototype = {
-	onExit: null
-	,__registerLimeModule: function(application) {
-	}
-	,__unregisterLimeModule: function(application) {
-	}
-	,__class__: lime_app_Module
-};
-var lime__$internal_backend_html5_HTML5Application = function(parent) {
-	this.gameDeviceCache = new haxe_ds_IntMap();
-	this.parent = parent;
-	this.currentUpdate = 0;
-	this.lastUpdate = 0;
-	this.nextUpdate = 0;
-	this.framePeriod = -1;
-	lime_media_AudioManager.init();
-	this.accelerometer = lime_system_Sensor.registerSensor(lime_system_SensorType.ACCELEROMETER,0);
-};
-$hxClasses["lime._internal.backend.html5.HTML5Application"] = lime__$internal_backend_html5_HTML5Application;
-lime__$internal_backend_html5_HTML5Application.__name__ = "lime._internal.backend.html5.HTML5Application";
-lime__$internal_backend_html5_HTML5Application.prototype = {
-	gameDeviceCache: null
-	,accelerometer: null
-	,currentUpdate: null
-	,deltaTime: null
-	,framePeriod: null
-	,lastUpdate: null
-	,nextUpdate: null
-	,parent: null
-	,convertKeyCode: function(keyCode) {
-		if(keyCode >= 65 && keyCode <= 90) {
-			return keyCode + 32;
-		}
-		switch(keyCode) {
-		case 12:
-			return 1073741980;
-		case 16:
-			return 1073742049;
-		case 17:
-			return 1073742048;
-		case 18:
-			return 1073742050;
-		case 19:
-			return 1073741896;
-		case 20:
-			return 1073741881;
-		case 33:
-			return 1073741899;
-		case 34:
-			return 1073741902;
-		case 35:
-			return 1073741901;
-		case 36:
-			return 1073741898;
-		case 37:
-			return 1073741904;
-		case 38:
-			return 1073741906;
-		case 39:
-			return 1073741903;
-		case 40:
-			return 1073741905;
-		case 41:
-			return 1073741943;
-		case 43:
-			return 1073741940;
-		case 44:
-			return 1073741894;
-		case 45:
-			return 1073741897;
-		case 46:
-			return 127;
-		case 91:
-			return 1073742051;
-		case 92:
-			return 1073742055;
-		case 93:
-			return 1073742055;
-		case 95:
-			return 1073742106;
-		case 96:
-			return 1073741922;
-		case 97:
-			return 1073741913;
-		case 98:
-			return 1073741914;
-		case 99:
-			return 1073741915;
-		case 100:
-			return 1073741916;
-		case 101:
-			return 1073741917;
-		case 102:
-			return 1073741918;
-		case 103:
-			return 1073741919;
-		case 104:
-			return 1073741920;
-		case 105:
-			return 1073741921;
-		case 106:
-			return 1073741909;
-		case 107:
-			return 1073741911;
-		case 108:
-			return 1073741923;
-		case 109:
-			return 1073741910;
-		case 110:
-			return 1073741923;
-		case 111:
-			return 1073741908;
-		case 112:
-			return 1073741882;
-		case 113:
-			return 1073741883;
-		case 114:
-			return 1073741884;
-		case 115:
-			return 1073741885;
-		case 116:
-			return 1073741886;
-		case 117:
-			return 1073741887;
-		case 118:
-			return 1073741888;
-		case 119:
-			return 1073741889;
-		case 120:
-			return 1073741890;
-		case 121:
-			return 1073741891;
-		case 122:
-			return 1073741892;
-		case 123:
-			return 1073741893;
-		case 124:
-			return 1073741928;
-		case 125:
-			return 1073741929;
-		case 126:
-			return 1073741930;
-		case 127:
-			return 1073741931;
-		case 128:
-			return 1073741932;
-		case 129:
-			return 1073741933;
-		case 130:
-			return 1073741934;
-		case 131:
-			return 1073741935;
-		case 132:
-			return 1073741936;
-		case 133:
-			return 1073741937;
-		case 134:
-			return 1073741938;
-		case 135:
-			return 1073741939;
-		case 144:
-			return 1073741907;
-		case 145:
-			return 1073741895;
-		case 160:
-			return 94;
-		case 161:
-			return 33;
-		case 163:
-			return 35;
-		case 164:
-			return 36;
-		case 166:
-			return 1073742094;
-		case 167:
-			return 1073742095;
-		case 168:
-			return 1073742097;
-		case 169:
-			return 41;
-		case 170:
-			return 42;
-		case 171:
-			return 96;
-		case 172:
-			return 1073741898;
-		case 173:
-			return 45;
-		case 174:
-			return 1073741953;
-		case 175:
-			return 1073741952;
-		case 176:
-			return 1073742082;
-		case 177:
-			return 1073742083;
-		case 178:
-			return 1073742084;
-		case 179:
-			return 1073742085;
-		case 180:
-			return 1073742089;
-		case 181:
-			return 1073742086;
-		case 182:
-			return 1073741953;
-		case 183:
-			return 1073741952;
-		case 186:
-			return 59;
-		case 187:
-			return 61;
-		case 188:
-			return 44;
-		case 189:
-			return 45;
-		case 190:
-			return 46;
-		case 191:
-			return 47;
-		case 192:
-			return 96;
-		case 193:
-			return 63;
-		case 194:
-			return 1073741923;
-		case 219:
-			return 91;
-		case 220:
-			return 92;
-		case 221:
-			return 93;
-		case 222:
-			return 39;
-		case 223:
-			return 96;
-		case 224:
-			return 1073742051;
-		case 226:
-			return 92;
-		}
-		return keyCode;
-	}
-	,exec: function() {
-		window.addEventListener("keydown",$bind(this,this.handleKeyEvent),false);
-		window.addEventListener("keyup",$bind(this,this.handleKeyEvent),false);
-		window.addEventListener("focus",$bind(this,this.handleWindowEvent),false);
-		window.addEventListener("blur",$bind(this,this.handleWindowEvent),false);
-		window.addEventListener("resize",$bind(this,this.handleWindowEvent),false);
-		window.addEventListener("beforeunload",$bind(this,this.handleWindowEvent),false);
-		window.addEventListener("devicemotion",$bind(this,this.handleSensorEvent),false);
-		
-			if (!CanvasRenderingContext2D.prototype.isPointInStroke) {
-				CanvasRenderingContext2D.prototype.isPointInStroke = function (path, x, y) {
-					return false;
-				};
-			}
-			if (!CanvasRenderingContext2D.prototype.isPointInPath) {
-				CanvasRenderingContext2D.prototype.isPointInPath = function (path, x, y) {
-					return false;
-				};
-			}
-
-			if ('performance' in window == false) {
-				window.performance = {};
-			}
-
-			if ('now' in window.performance == false) {
-				var offset = Date.now();
-				if (performance.timing && performance.timing.navigationStart) {
-					offset = performance.timing.navigationStart
-				}
-				window.performance.now = function now() {
-					return Date.now() - offset;
-				}
-			}
-
-			var lastTime = 0;
-			var vendors = ['ms', 'moz', 'webkit', 'o'];
-			for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-				window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-				window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
-			}
-
-			if (!window.requestAnimationFrame)
-				window.requestAnimationFrame = function(callback, element) {
-					var currTime = new Date().getTime();
-					var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-					var id = window.setTimeout(function() { callback(currTime + timeToCall); },
-					  timeToCall);
-					lastTime = currTime + timeToCall;
-					return id;
-				};
-
-			if (!window.cancelAnimationFrame)
-				window.cancelAnimationFrame = function(id) {
-					clearTimeout(id);
-				};
-
-			window.requestAnimFrame = window.requestAnimationFrame;
-		;
-		this.lastUpdate = new Date().getTime();
-		this.handleApplicationEvent();
-		return 0;
-	}
-	,exit: function() {
-	}
-	,handleApplicationEvent: function(__) {
-		var _g = 0;
-		var _g1 = this.parent.__windows;
-		while(_g < _g1.length) {
-			var $window = _g1[_g];
-			++_g;
-			$window.__backend.updateSize();
-		}
-		this.updateGameDevices();
-		this.currentUpdate = new Date().getTime();
-		if(this.currentUpdate >= this.nextUpdate) {
-			this.deltaTime = this.currentUpdate - this.lastUpdate;
-			var _g2 = 0;
-			var _g3 = this.parent.__windows;
-			while(_g2 < _g3.length) {
-				var window1 = _g3[_g2];
-				++_g2;
-				this.parent.onUpdate.dispatch(this.deltaTime | 0);
-				if(window1.context != null) {
-					window1.onRender.dispatch(window1.context);
-				}
-			}
-			if(this.framePeriod < 0) {
-				this.nextUpdate = this.currentUpdate;
-			} else {
-				this.nextUpdate = this.currentUpdate - this.currentUpdate % this.framePeriod + this.framePeriod;
-			}
-			this.lastUpdate = this.currentUpdate;
-		}
-		window.requestAnimationFrame($bind(this,this.handleApplicationEvent));
-	}
-	,handleKeyEvent: function(event) {
-		if(this.parent.__window != null) {
-			var keyCode = this.convertKeyCode(event.keyCode != null ? event.keyCode : event.which);
-			var modifier = (event.shiftKey ? 3 : 0) | (event.ctrlKey ? 192 : 0) | (event.altKey ? 768 : 0) | (event.metaKey ? 3072 : 0);
-			if(event.type == "keydown") {
-				this.parent.__window.onKeyDown.dispatch(keyCode,modifier);
-				if(this.parent.__window.onKeyDown.canceled && event.cancelable) {
-					event.preventDefault();
-				}
-			} else {
-				this.parent.__window.onKeyUp.dispatch(keyCode,modifier);
-				if(this.parent.__window.onKeyUp.canceled && event.cancelable) {
-					event.preventDefault();
-				}
-			}
-		}
-	}
-	,handleSensorEvent: function(event) {
-		this.accelerometer.onUpdate.dispatch(event.accelerationIncludingGravity.x,event.accelerationIncludingGravity.y,event.accelerationIncludingGravity.z);
-	}
-	,handleWindowEvent: function(event) {
-		if(this.parent.__window != null) {
-			switch(event.type) {
-			case "beforeunload":
-				break;
-			case "blur":
-				this.parent.__window.onFocusOut.dispatch();
-				this.parent.__window.onDeactivate.dispatch();
-				break;
-			case "focus":
-				this.parent.__window.onFocusIn.dispatch();
-				this.parent.__window.onActivate.dispatch();
-				break;
-			case "resize":
-				this.parent.__window.__backend.handleResizeEvent(event);
-				break;
-			}
-		}
-	}
-	,updateGameDevices: function() {
-		var devices = lime_ui_Joystick.__getDeviceData();
-		if(devices == null) {
-			return;
-		}
-		var id;
-		var gamepad;
-		var joystick;
-		var data;
-		var cache;
-		var _g = 0;
-		var _g1 = devices.length;
-		while(_g < _g1) {
-			var i = _g++;
-			id = i;
-			data = devices[id];
-			if(data == null) {
-				continue;
-			}
-			if(!this.gameDeviceCache.h.hasOwnProperty(id)) {
-				cache = new lime__$internal_backend_html5_GameDeviceData();
-				cache.id = id;
-				cache.connected = data.connected;
-				var _g2 = 0;
-				var _g11 = data.buttons.length;
-				while(_g2 < _g11) {
-					var i1 = _g2++;
-					cache.buttons.push(data.buttons[i1].value);
-				}
-				var _g21 = 0;
-				var _g3 = data.axes.length;
-				while(_g21 < _g3) {
-					var i2 = _g21++;
-					cache.axes.push(data.axes[i2]);
-				}
-				if(data.mapping == "standard") {
-					cache.isGamepad = true;
-				}
-				this.gameDeviceCache.h[id] = cache;
-				if(data.connected) {
-					lime_ui_Joystick.__connect(id);
-					if(cache.isGamepad) {
-						lime_ui_Gamepad.__connect(id);
-					}
-				}
-			}
-			cache = this.gameDeviceCache.h[id];
-			joystick = lime_ui_Joystick.devices.h[id];
-			gamepad = lime_ui_Gamepad.devices.h[id];
-			if(data.connected) {
-				var button;
-				var value;
-				var _g4 = 0;
-				var _g12 = data.buttons.length;
-				while(_g4 < _g12) {
-					var i3 = _g4++;
-					value = data.buttons[i3].value;
-					if(value != cache.buttons[i3]) {
-						if(i3 == 6) {
-							joystick.onAxisMove.dispatch(data.axes.length,value);
-							if(gamepad != null) {
-								gamepad.onAxisMove.dispatch(4,value);
-							}
-						} else if(i3 == 7) {
-							joystick.onAxisMove.dispatch(data.axes.length + 1,value);
-							if(gamepad != null) {
-								gamepad.onAxisMove.dispatch(5,value);
-							}
-						} else {
-							if(value > 0) {
-								joystick.onButtonDown.dispatch(i3);
-							} else {
-								joystick.onButtonUp.dispatch(i3);
-							}
-							if(gamepad != null) {
-								switch(i3) {
-								case 0:
-									button = 0;
-									break;
-								case 1:
-									button = 1;
-									break;
-								case 2:
-									button = 2;
-									break;
-								case 3:
-									button = 3;
-									break;
-								case 4:
-									button = 9;
-									break;
-								case 5:
-									button = 10;
-									break;
-								case 8:
-									button = 4;
-									break;
-								case 9:
-									button = 6;
-									break;
-								case 10:
-									button = 7;
-									break;
-								case 11:
-									button = 8;
-									break;
-								case 12:
-									button = 11;
-									break;
-								case 13:
-									button = 12;
-									break;
-								case 14:
-									button = 13;
-									break;
-								case 15:
-									button = 14;
-									break;
-								case 16:
-									button = 5;
-									break;
-								default:
-									continue;
-								}
-								if(value > 0) {
-									gamepad.onButtonDown.dispatch(button);
-								} else {
-									gamepad.onButtonUp.dispatch(button);
-								}
-							}
-						}
-						cache.buttons[i3] = value;
-					}
-				}
-				var _g22 = 0;
-				var _g31 = data.axes.length;
-				while(_g22 < _g31) {
-					var i4 = _g22++;
-					if(data.axes[i4] != cache.axes[i4]) {
-						joystick.onAxisMove.dispatch(i4,data.axes[i4]);
-						if(gamepad != null) {
-							gamepad.onAxisMove.dispatch(i4,data.axes[i4]);
-						}
-						cache.axes[i4] = data.axes[i4];
-					}
-				}
-			} else if(cache.connected) {
-				cache.connected = false;
-				lime_ui_Joystick.__disconnect(id);
-				lime_ui_Gamepad.__disconnect(id);
-			}
-		}
-	}
-	,__class__: lime__$internal_backend_html5_HTML5Application
-};
-var lime_app_Application = function() {
-	this.onCreateWindow = new lime_app__$Event_$lime_$ui_$Window_$Void();
-	this.onUpdate = new lime_app__$Event_$Int_$Void();
-	lime_app_Module.call(this);
-	if(lime_app_Application.current == null) {
-		lime_app_Application.current = this;
-	}
-	this.meta = new haxe_ds_StringMap();
-	this.modules = [];
-	this.__windowByID = new haxe_ds_IntMap();
-	this.__windows = [];
-	this.__backend = new lime__$internal_backend_html5_HTML5Application(this);
-	this.__registerLimeModule(this);
-	this.__preloader = new lime_utils_Preloader();
-	this.__preloader.onProgress.add($bind(this,this.onPreloadProgress));
-	this.__preloader.onComplete.add($bind(this,this.onPreloadComplete));
-};
-$hxClasses["lime.app.Application"] = lime_app_Application;
-lime_app_Application.__name__ = "lime.app.Application";
-lime_app_Application.__super__ = lime_app_Module;
-lime_app_Application.prototype = $extend(lime_app_Module.prototype,{
-	meta: null
-	,modules: null
-	,onUpdate: null
-	,onCreateWindow: null
-	,preloader: null
-	,window: null
-	,windows: null
-	,__backend: null
-	,__preloader: null
-	,__window: null
-	,__windowByID: null
-	,__windows: null
-	,addModule: function(module) {
-		module.__registerLimeModule(this);
-		this.modules.push(module);
-	}
-	,createWindow: function(attributes) {
-		var $window = this.__createWindow(attributes);
-		this.__addWindow($window);
-		return $window;
-	}
-	,exec: function() {
-		lime_app_Application.current = this;
-		return this.__backend.exec();
-	}
-	,onGamepadAxisMove: function(gamepad,axis,value) {
-	}
-	,onGamepadButtonDown: function(gamepad,button) {
-	}
-	,onGamepadButtonUp: function(gamepad,button) {
-	}
-	,onGamepadConnect: function(gamepad) {
-	}
-	,onGamepadDisconnect: function(gamepad) {
-	}
-	,onJoystickAxisMove: function(joystick,axis,value) {
-	}
-	,onJoystickButtonDown: function(joystick,button) {
-	}
-	,onJoystickButtonUp: function(joystick,button) {
-	}
-	,onJoystickConnect: function(joystick) {
-	}
-	,onJoystickDisconnect: function(joystick) {
-	}
-	,onJoystickHatMove: function(joystick,hat,position) {
-	}
-	,onJoystickTrackballMove: function(joystick,trackball,x,y) {
-	}
-	,onKeyDown: function(keyCode,modifier) {
-	}
-	,onKeyUp: function(keyCode,modifier) {
-	}
-	,onModuleExit: function(code) {
-	}
-	,onMouseDown: function(x,y,button) {
-	}
-	,onMouseMove: function(x,y) {
-	}
-	,onMouseMoveRelative: function(x,y) {
-	}
-	,onMouseUp: function(x,y,button) {
-	}
-	,onMouseWheel: function(deltaX,deltaY,deltaMode) {
-	}
-	,onPreloadComplete: function() {
-	}
-	,onPreloadProgress: function(loaded,total) {
-	}
-	,onRenderContextLost: function() {
-	}
-	,onRenderContextRestored: function(context) {
-	}
-	,onTextEdit: function(text,start,length) {
-	}
-	,onTextInput: function(text) {
-	}
-	,onTouchCancel: function(touch) {
-	}
-	,onTouchEnd: function(touch) {
-	}
-	,onTouchMove: function(touch) {
-	}
-	,onTouchStart: function(touch) {
-	}
-	,onWindowActivate: function() {
-	}
-	,onWindowClose: function() {
-	}
-	,onWindowCreate: function() {
-	}
-	,onWindowDeactivate: function() {
-	}
-	,onWindowDropFile: function(file) {
-	}
-	,onWindowEnter: function() {
-	}
-	,onWindowExpose: function() {
-	}
-	,onWindowFocusIn: function() {
-	}
-	,onWindowFocusOut: function() {
-	}
-	,onWindowFullscreen: function() {
-	}
-	,onWindowLeave: function() {
-	}
-	,onWindowMove: function(x,y) {
-	}
-	,onWindowMinimize: function() {
-	}
-	,onWindowResize: function(width,height) {
-	}
-	,onWindowRestore: function() {
-	}
-	,removeModule: function(module) {
-		if(module != null) {
-			module.__unregisterLimeModule(this);
-			HxOverrides.remove(this.modules,module);
-		}
-	}
-	,render: function(context) {
-	}
-	,update: function(deltaTime) {
-	}
-	,__addWindow: function($window) {
-		if($window != null) {
-			this.__windows.push($window);
-			this.__windowByID.h[$window.id] = $window;
-			var f = $bind(this,this.__onWindowClose);
-			var window1 = $window;
-			var tmp = function() {
-				f(window1);
-			};
-			$window.onClose.add(tmp,false,-10000);
-			if(this.__window == null) {
-				this.__window = $window;
-				$window.onActivate.add($bind(this,this.onWindowActivate));
-				$window.onRenderContextLost.add($bind(this,this.onRenderContextLost));
-				$window.onRenderContextRestored.add($bind(this,this.onRenderContextRestored));
-				$window.onDeactivate.add($bind(this,this.onWindowDeactivate));
-				$window.onDropFile.add($bind(this,this.onWindowDropFile));
-				$window.onEnter.add($bind(this,this.onWindowEnter));
-				$window.onExpose.add($bind(this,this.onWindowExpose));
-				$window.onFocusIn.add($bind(this,this.onWindowFocusIn));
-				$window.onFocusOut.add($bind(this,this.onWindowFocusOut));
-				$window.onFullscreen.add($bind(this,this.onWindowFullscreen));
-				$window.onKeyDown.add($bind(this,this.onKeyDown));
-				$window.onKeyUp.add($bind(this,this.onKeyUp));
-				$window.onLeave.add($bind(this,this.onWindowLeave));
-				$window.onMinimize.add($bind(this,this.onWindowMinimize));
-				$window.onMouseDown.add($bind(this,this.onMouseDown));
-				$window.onMouseMove.add($bind(this,this.onMouseMove));
-				$window.onMouseMoveRelative.add($bind(this,this.onMouseMoveRelative));
-				$window.onMouseUp.add($bind(this,this.onMouseUp));
-				$window.onMouseWheel.add($bind(this,this.onMouseWheel));
-				$window.onMove.add($bind(this,this.onWindowMove));
-				$window.onRender.add($bind(this,this.render));
-				$window.onResize.add($bind(this,this.onWindowResize));
-				$window.onRestore.add($bind(this,this.onWindowRestore));
-				$window.onTextEdit.add($bind(this,this.onTextEdit));
-				$window.onTextInput.add($bind(this,this.onTextInput));
-				this.onWindowCreate();
-			}
-			this.onCreateWindow.dispatch($window);
-		}
-	}
-	,__createWindow: function(attributes) {
-		var $window = new lime_ui_Window(this,attributes);
-		if($window.id == -1) {
-			return null;
-		}
-		return $window;
-	}
-	,__registerLimeModule: function(application) {
-		application.onUpdate.add($bind(this,this.update));
-		application.onExit.add($bind(this,this.onModuleExit),false,0);
-		application.onExit.add($bind(this,this.__onModuleExit),false,0);
-		var gamepad = lime_ui_Gamepad.devices.iterator();
-		while(gamepad.hasNext()) {
-			var gamepad1 = gamepad.next();
-			this.__onGamepadConnect(gamepad1);
-		}
-		lime_ui_Gamepad.onConnect.add($bind(this,this.__onGamepadConnect));
-		var joystick = lime_ui_Joystick.devices.iterator();
-		while(joystick.hasNext()) {
-			var joystick1 = joystick.next();
-			this.__onJoystickConnect(joystick1);
-		}
-		lime_ui_Joystick.onConnect.add($bind(this,this.__onJoystickConnect));
-		lime_ui_Touch.onCancel.add($bind(this,this.onTouchCancel));
-		lime_ui_Touch.onStart.add($bind(this,this.onTouchStart));
-		lime_ui_Touch.onMove.add($bind(this,this.onTouchMove));
-		lime_ui_Touch.onEnd.add($bind(this,this.onTouchEnd));
-	}
-	,__removeWindow: function($window) {
-		if($window != null && this.__windowByID.h.hasOwnProperty($window.id)) {
-			if(this.__window == $window) {
-				this.__window = null;
-			}
-			HxOverrides.remove(this.__windows,$window);
-			this.__windowByID.remove($window.id);
-			$window.close();
-			if(this.__windows.length == 0) {
-				lime_system_System.exit(0);
-			}
-		}
-	}
-	,__onGamepadConnect: function(gamepad) {
-		this.onGamepadConnect(gamepad);
-		var f = $bind(this,this.onGamepadAxisMove);
-		var gamepad1 = gamepad;
-		var tmp = function(axis,value) {
-			f(gamepad1,axis,value);
-		};
-		gamepad.onAxisMove.add(tmp);
-		var f1 = $bind(this,this.onGamepadButtonDown);
-		var gamepad2 = gamepad;
-		var tmp1 = function(button) {
-			f1(gamepad2,button);
-		};
-		gamepad.onButtonDown.add(tmp1);
-		var f2 = $bind(this,this.onGamepadButtonUp);
-		var gamepad3 = gamepad;
-		var tmp2 = function(button1) {
-			f2(gamepad3,button1);
-		};
-		gamepad.onButtonUp.add(tmp2);
-		var f3 = $bind(this,this.onGamepadDisconnect);
-		var gamepad4 = gamepad;
-		var tmp3 = function() {
-			f3(gamepad4);
-		};
-		gamepad.onDisconnect.add(tmp3);
-	}
-	,__onJoystickConnect: function(joystick) {
-		this.onJoystickConnect(joystick);
-		var f = $bind(this,this.onJoystickAxisMove);
-		var joystick1 = joystick;
-		var tmp = function(axis,value) {
-			f(joystick1,axis,value);
-		};
-		joystick.onAxisMove.add(tmp);
-		var f1 = $bind(this,this.onJoystickButtonDown);
-		var joystick2 = joystick;
-		var tmp1 = function(button) {
-			f1(joystick2,button);
-		};
-		joystick.onButtonDown.add(tmp1);
-		var f2 = $bind(this,this.onJoystickButtonUp);
-		var joystick3 = joystick;
-		var tmp2 = function(button1) {
-			f2(joystick3,button1);
-		};
-		joystick.onButtonUp.add(tmp2);
-		var f3 = $bind(this,this.onJoystickDisconnect);
-		var joystick4 = joystick;
-		var tmp3 = function() {
-			f3(joystick4);
-		};
-		joystick.onDisconnect.add(tmp3);
-		var f4 = $bind(this,this.onJoystickHatMove);
-		var joystick5 = joystick;
-		var tmp4 = function(hat,position) {
-			f4(joystick5,hat,position);
-		};
-		joystick.onHatMove.add(tmp4);
-		var f5 = $bind(this,this.onJoystickTrackballMove);
-		var joystick6 = joystick;
-		var tmp5 = function(trackball,x,y) {
-			f5(joystick6,trackball,x,y);
-		};
-		joystick.onTrackballMove.add(tmp5);
-	}
-	,__onModuleExit: function(code) {
-		this.__backend.exit();
-	}
-	,__onWindowClose: function($window) {
-		if(this.__window == $window) {
-			this.onWindowClose();
-		}
-		this.__removeWindow($window);
-	}
-	,__unregisterLimeModule: function(application) {
-		application.onUpdate.remove($bind(this,this.update));
-		application.onExit.remove($bind(this,this.__onModuleExit));
-		application.onExit.remove($bind(this,this.onModuleExit));
-		lime_ui_Gamepad.onConnect.remove($bind(this,this.__onGamepadConnect));
-		lime_ui_Joystick.onConnect.remove($bind(this,this.__onJoystickConnect));
-		lime_ui_Touch.onCancel.remove($bind(this,this.onTouchCancel));
-		lime_ui_Touch.onStart.remove($bind(this,this.onTouchStart));
-		lime_ui_Touch.onMove.remove($bind(this,this.onTouchMove));
-		lime_ui_Touch.onEnd.remove($bind(this,this.onTouchEnd));
-		this.onModuleExit(0);
-	}
-	,get_preloader: function() {
-		return this.__preloader;
-	}
-	,get_window: function() {
-		return this.__window;
-	}
-	,get_windows: function() {
-		return this.__windows;
-	}
-	,__class__: lime_app_Application
-	,__properties__: {get_windows:"get_windows",get_window:"get_window",get_preloader:"get_preloader"}
-});
-var ApplicationMain = function() { };
-$hxClasses["ApplicationMain"] = ApplicationMain;
-ApplicationMain.__name__ = "ApplicationMain";
-ApplicationMain.main = function() {
-	lime_system_System.__registerEntryPoint("AddingAnimation",ApplicationMain.create);
-};
-ApplicationMain.create = function(config) {
-	var app = new openfl_display_Application();
-	ManifestResources.init(config);
-	var _this = app.meta;
-	if(__map_reserved["build"] != null) {
-		_this.setReserved("build","24");
-	} else {
-		_this.h["build"] = "24";
-	}
-	var _this1 = app.meta;
-	if(__map_reserved["company"] != null) {
-		_this1.setReserved("company","OpenFL");
-	} else {
-		_this1.h["company"] = "OpenFL";
-	}
-	var _this2 = app.meta;
-	if(__map_reserved["file"] != null) {
-		_this2.setReserved("file","AddingAnimation");
-	} else {
-		_this2.h["file"] = "AddingAnimation";
-	}
-	var _this3 = app.meta;
-	if(__map_reserved["name"] != null) {
-		_this3.setReserved("name","Adding Animation");
-	} else {
-		_this3.h["name"] = "Adding Animation";
-	}
-	var _this4 = app.meta;
-	if(__map_reserved["packageName"] != null) {
-		_this4.setReserved("packageName","org.openfl.samples.addinganimation");
-	} else {
-		_this4.h["packageName"] = "org.openfl.samples.addinganimation";
-	}
-	var _this5 = app.meta;
-	if(__map_reserved["version"] != null) {
-		_this5.setReserved("version","1.0.0");
-	} else {
-		_this5.h["version"] = "1.0.0";
-	}
-	var attributes = { allowHighDPI : false, alwaysOnTop : false, borderless : false, element : null, frameRate : 60, height : 720, hidden : false, maximized : false, minimized : false, parameters : { }, resizable : true, title : "Adding Animation", width : 1280, x : null, y : null};
-	attributes.context = { antialiasing : 0, background : 16777215, colorDepth : 32, depth : true, hardware : true, stencil : true, type : null, vsync : false};
-	if(app.__window == null) {
-		if(config != null) {
-			var _g = 0;
-			var _g1 = Reflect.fields(config);
-			while(_g < _g1.length) {
-				var field = _g1[_g];
-				++_g;
-				if(Object.prototype.hasOwnProperty.call(attributes,field)) {
-					attributes[field] = Reflect.field(config,field);
-				} else if(Object.prototype.hasOwnProperty.call(attributes.context,field)) {
-					attributes.context[field] = Reflect.field(config,field);
-				}
-			}
-		}
-	}
-	app.createWindow(attributes);
-	var preloader = new openfl_display_Preloader(new openfl_display_DefaultPreloader());
-	app.__preloader.onProgress.add(function(loaded,total) {
-		preloader.update(loaded,total);
-	});
-	app.__preloader.onComplete.add(function() {
-		preloader.start();
-	});
-	var stage = (js_Boot.__cast(app.__window , openfl_display_Window)).stage;
-	var tmp = function() {
-		ApplicationMain.start(stage);
-	};
-	preloader.onComplete.add(tmp);
-	var _g2 = 0;
-	var _g11 = ManifestResources.preloadLibraries;
-	while(_g2 < _g11.length) {
-		var library = _g11[_g2];
-		++_g2;
-		app.__preloader.addLibrary(library);
-	}
-	var _g21 = 0;
-	var _g3 = ManifestResources.preloadLibraryNames;
-	while(_g21 < _g3.length) {
-		var name = _g3[_g21];
-		++_g21;
-		app.__preloader.addLibraryName(name);
-	}
-	app.__preloader.load();
-	var result = app.exec();
-};
-ApplicationMain.start = function(stage) {
-	try {
-		var current = stage.getChildAt(0);
-		if(current == null || !((current) instanceof openfl_display_DisplayObjectContainer)) {
-			current = new openfl_display_MovieClip();
-			stage.addChild(current);
-		}
-		new DocumentClass(current);
-		stage.dispatchEvent(new openfl_events_Event("resize",false,false));
-		if(stage.window.__fullscreen) {
-			stage.dispatchEvent(new openfl_events_FullScreenEvent("fullScreen",false,false,true,true));
-		}
-	} catch( e ) {
-		haxe_CallStack.lastException = e;
-		stage.__handleError(((e) instanceof js__$Boot_HaxeError) ? e.val : e);
-	}
-};
 var openfl_events_IEventDispatcher = function() { };
 $hxClasses["openfl.events.IEventDispatcher"] = openfl_events_IEventDispatcher;
 openfl_events_IEventDispatcher.__name__ = "openfl.events.IEventDispatcher";
@@ -4557,6 +3573,1174 @@ openfl_display_Sprite.prototype = $extend(openfl_display_DisplayObjectContainer.
 	,__class__: openfl_display_Sprite
 	,__properties__: $extend(openfl_display_DisplayObjectContainer.prototype.__properties__,{get_graphics:"get_graphics",set_buttonMode:"set_buttonMode",get_buttonMode:"get_buttonMode"})
 });
+var hacksaw_Scene = function() {
+	openfl_display_Sprite.call(this);
+};
+$hxClasses["hacksaw.Scene"] = hacksaw_Scene;
+hacksaw_Scene.__name__ = "hacksaw.Scene";
+hacksaw_Scene.__super__ = openfl_display_Sprite;
+hacksaw_Scene.prototype = $extend(openfl_display_Sprite.prototype,{
+	onEnter: function(previous) {
+	}
+	,onExit: function(next) {
+	}
+	,onResize: function(event) {
+	}
+	,onFrameEnter: function(event) {
+	}
+	,onMouseOver: function(event) {
+	}
+	,onMouseDown: function(event) {
+	}
+	,onMouseUp: function(event) {
+	}
+	,onMouseClick: function(event) {
+	}
+	,__class__: hacksaw_Scene
+});
+var GameScene = function() {
+	this.interactable = true;
+	this.soundFinish = openfl_utils_Assets.getSound("assets/sounds/kids_cheering.wav");
+	hacksaw_Scene.call(this);
+	this.opaqueBackground = 51;
+};
+$hxClasses["GameScene"] = GameScene;
+GameScene.__name__ = "GameScene";
+GameScene.__super__ = hacksaw_Scene;
+GameScene.prototype = $extend(hacksaw_Scene.prototype,{
+	soundFinish: null
+	,particleSystem: null
+	,interactable: null
+	,renderer: null
+	,onEnter: function(previous) {
+	}
+	,finishWithSuccess: function() {
+		this.soundFinish.play();
+		haxe_Timer.delay($bind(this,this.onFinishWithSuccess),2000);
+	}
+	,onFinishWithSuccess: function() {
+		this.particleSystem.stop();
+		this.removeChildren();
+		hacksaw_SceneManager.restart();
+	}
+	,initParticles: function() {
+		this.renderer = org_zamedev_particles_renderers_DefaultParticleRenderer.createInstance();
+		this.addChild(this.renderer);
+		this.particleSystem = org_zamedev_particles_loaders_ParticleLoader.load("assets/particles/trippy.plist");
+		this.renderer.addParticleSystem(this.particleSystem);
+	}
+	,addExitButton: function() {
+		var tf = new DefaultTextField();
+		tf.set_text("X");
+		tf.set_x(0);
+		tf.set_y(0);
+		tf.addEventListener("mouseDown",$bind(this,this.closeGame));
+		this.addChild(tf);
+		tf = new DefaultTextField();
+		tf.set_text("C");
+		tf.set_x(openfl_Lib.get_current().stage.stageWidth - tf.get_width() - 5);
+		tf.set_y(0);
+		tf.addEventListener("mouseDown",function(e) {
+			hacksaw_SceneManager.push(hacksaw_SceneManager.get().getCurrentSceneName() + "Config");
+		});
+		this.addChild(tf);
+	}
+	,closeGame: function(e) {
+		hacksaw_SceneManager.pop();
+	}
+	,playSoundsInSequence: function(sounds,callback,stopInteracting) {
+		if(stopInteracting == null) {
+			stopInteracting = true;
+		}
+		var _gthis = this;
+		if(sounds.length == 0) {
+			this.interactable = true;
+			if(callback != null) {
+				callback();
+			}
+			return;
+		}
+		if(stopInteracting) {
+			this.interactable = false;
+		}
+		var element = sounds[0];
+		if(((element) instanceof openfl_media_Sound)) {
+			var sound = element;
+			var channel = sound.play();
+			channel.addEventListener("soundComplete",function(e) {
+				var tmp = sounds.slice(1);
+				_gthis.playSoundsInSequence(tmp,callback,stopInteracting);
+			});
+		} else if(typeof(element) == "number" && ((element | 0) === element)) {
+			var ms = element;
+			haxe_Timer.delay(function() {
+				var tmp1 = sounds.slice(1);
+				_gthis.playSoundsInSequence(tmp1,callback,stopInteracting);
+			},ms);
+		}
+	}
+	,highlightCorrectSprite: function(sprite) {
+	}
+	,__class__: GameScene
+});
+var AbstractClickAllGame = function(creator,chooser,layout,soundQuestion,soundTap) {
+	GameScene.call(this);
+	this.creator = creator;
+	this.chooser = chooser;
+	this.layout = layout;
+	this.soundWhere = soundQuestion;
+	this.soundPop = soundTap;
+};
+$hxClasses["AbstractClickAllGame"] = AbstractClickAllGame;
+AbstractClickAllGame.__name__ = "AbstractClickAllGame";
+AbstractClickAllGame.__super__ = GameScene;
+AbstractClickAllGame.prototype = $extend(GameScene.prototype,{
+	creator: null
+	,chooser: null
+	,soundWhere: null
+	,soundPop: null
+	,layout: null
+	,onEnter: function(previous) {
+		var _gthis = this;
+		GameScene.prototype.onEnter.call(this,previous);
+		this.removeChildren();
+		this.layout.removeChildren();
+		this.addChild(this.layout);
+		var sprites = this.creator.createSprites();
+		var _g = 0;
+		while(_g < sprites.length) {
+			var s = [sprites[_g]];
+			++_g;
+			this.layout.addChild(s[0]);
+			var tmp = (function(s1) {
+				return function(e) {
+					_gthis.clickedSprite(s1[0]);
+					return;
+				};
+			})(s);
+			s[0].addEventListener("mouseDown",tmp);
+		}
+		this.chooser.items = sprites;
+		this.addExitButton();
+		this.initParticles();
+		this.chooser.next();
+		this.askPlayer();
+	}
+	,clickedSprite: function(sprite) {
+		var _gthis = this;
+		if(!this.interactable) {
+			return;
+		}
+		var correct = sprite == this.chooser.current();
+		if(correct) {
+			this.soundPop.play();
+			this.highlightCorrectSprite(sprite);
+			sprite.set_visible(false);
+			sprite.removeEventListener("mouseDown",null);
+		}
+		this.playSoundsInSequence(this.soundsForSprite(sprite),function() {
+			if(correct) {
+				_gthis.chooser.next();
+				_gthis.askPlayer();
+			}
+		});
+	}
+	,soundsForSprite: function(sprite) {
+		return [];
+	}
+	,askPlayer: function() {
+		if(this.chooser.finished()) {
+			this.finishWithSuccess();
+		} else {
+			this.playSoundsInSequence([this.soundWhere].concat(this.soundsForSprite(this.chooser.current())));
+		}
+	}
+	,__class__: AbstractClickAllGame
+});
+var lime_app_IModule = function() { };
+$hxClasses["lime.app.IModule"] = lime_app_IModule;
+lime_app_IModule.__name__ = "lime.app.IModule";
+lime_app_IModule.__isInterface__ = true;
+lime_app_IModule.prototype = {
+	__registerLimeModule: null
+	,__unregisterLimeModule: null
+	,__class__: lime_app_IModule
+};
+var lime_app_Module = function() {
+	this.onExit = new lime_app__$Event_$Int_$Void();
+};
+$hxClasses["lime.app.Module"] = lime_app_Module;
+lime_app_Module.__name__ = "lime.app.Module";
+lime_app_Module.__interfaces__ = [lime_app_IModule];
+lime_app_Module.prototype = {
+	onExit: null
+	,__registerLimeModule: function(application) {
+	}
+	,__unregisterLimeModule: function(application) {
+	}
+	,__class__: lime_app_Module
+};
+var lime__$internal_backend_html5_HTML5Application = function(parent) {
+	this.gameDeviceCache = new haxe_ds_IntMap();
+	this.parent = parent;
+	this.currentUpdate = 0;
+	this.lastUpdate = 0;
+	this.nextUpdate = 0;
+	this.framePeriod = -1;
+	lime_media_AudioManager.init();
+	this.accelerometer = lime_system_Sensor.registerSensor(lime_system_SensorType.ACCELEROMETER,0);
+};
+$hxClasses["lime._internal.backend.html5.HTML5Application"] = lime__$internal_backend_html5_HTML5Application;
+lime__$internal_backend_html5_HTML5Application.__name__ = "lime._internal.backend.html5.HTML5Application";
+lime__$internal_backend_html5_HTML5Application.prototype = {
+	gameDeviceCache: null
+	,accelerometer: null
+	,currentUpdate: null
+	,deltaTime: null
+	,framePeriod: null
+	,lastUpdate: null
+	,nextUpdate: null
+	,parent: null
+	,convertKeyCode: function(keyCode) {
+		if(keyCode >= 65 && keyCode <= 90) {
+			return keyCode + 32;
+		}
+		switch(keyCode) {
+		case 12:
+			return 1073741980;
+		case 16:
+			return 1073742049;
+		case 17:
+			return 1073742048;
+		case 18:
+			return 1073742050;
+		case 19:
+			return 1073741896;
+		case 20:
+			return 1073741881;
+		case 33:
+			return 1073741899;
+		case 34:
+			return 1073741902;
+		case 35:
+			return 1073741901;
+		case 36:
+			return 1073741898;
+		case 37:
+			return 1073741904;
+		case 38:
+			return 1073741906;
+		case 39:
+			return 1073741903;
+		case 40:
+			return 1073741905;
+		case 41:
+			return 1073741943;
+		case 43:
+			return 1073741940;
+		case 44:
+			return 1073741894;
+		case 45:
+			return 1073741897;
+		case 46:
+			return 127;
+		case 91:
+			return 1073742051;
+		case 92:
+			return 1073742055;
+		case 93:
+			return 1073742055;
+		case 95:
+			return 1073742106;
+		case 96:
+			return 1073741922;
+		case 97:
+			return 1073741913;
+		case 98:
+			return 1073741914;
+		case 99:
+			return 1073741915;
+		case 100:
+			return 1073741916;
+		case 101:
+			return 1073741917;
+		case 102:
+			return 1073741918;
+		case 103:
+			return 1073741919;
+		case 104:
+			return 1073741920;
+		case 105:
+			return 1073741921;
+		case 106:
+			return 1073741909;
+		case 107:
+			return 1073741911;
+		case 108:
+			return 1073741923;
+		case 109:
+			return 1073741910;
+		case 110:
+			return 1073741923;
+		case 111:
+			return 1073741908;
+		case 112:
+			return 1073741882;
+		case 113:
+			return 1073741883;
+		case 114:
+			return 1073741884;
+		case 115:
+			return 1073741885;
+		case 116:
+			return 1073741886;
+		case 117:
+			return 1073741887;
+		case 118:
+			return 1073741888;
+		case 119:
+			return 1073741889;
+		case 120:
+			return 1073741890;
+		case 121:
+			return 1073741891;
+		case 122:
+			return 1073741892;
+		case 123:
+			return 1073741893;
+		case 124:
+			return 1073741928;
+		case 125:
+			return 1073741929;
+		case 126:
+			return 1073741930;
+		case 127:
+			return 1073741931;
+		case 128:
+			return 1073741932;
+		case 129:
+			return 1073741933;
+		case 130:
+			return 1073741934;
+		case 131:
+			return 1073741935;
+		case 132:
+			return 1073741936;
+		case 133:
+			return 1073741937;
+		case 134:
+			return 1073741938;
+		case 135:
+			return 1073741939;
+		case 144:
+			return 1073741907;
+		case 145:
+			return 1073741895;
+		case 160:
+			return 94;
+		case 161:
+			return 33;
+		case 163:
+			return 35;
+		case 164:
+			return 36;
+		case 166:
+			return 1073742094;
+		case 167:
+			return 1073742095;
+		case 168:
+			return 1073742097;
+		case 169:
+			return 41;
+		case 170:
+			return 42;
+		case 171:
+			return 96;
+		case 172:
+			return 1073741898;
+		case 173:
+			return 45;
+		case 174:
+			return 1073741953;
+		case 175:
+			return 1073741952;
+		case 176:
+			return 1073742082;
+		case 177:
+			return 1073742083;
+		case 178:
+			return 1073742084;
+		case 179:
+			return 1073742085;
+		case 180:
+			return 1073742089;
+		case 181:
+			return 1073742086;
+		case 182:
+			return 1073741953;
+		case 183:
+			return 1073741952;
+		case 186:
+			return 59;
+		case 187:
+			return 61;
+		case 188:
+			return 44;
+		case 189:
+			return 45;
+		case 190:
+			return 46;
+		case 191:
+			return 47;
+		case 192:
+			return 96;
+		case 193:
+			return 63;
+		case 194:
+			return 1073741923;
+		case 219:
+			return 91;
+		case 220:
+			return 92;
+		case 221:
+			return 93;
+		case 222:
+			return 39;
+		case 223:
+			return 96;
+		case 224:
+			return 1073742051;
+		case 226:
+			return 92;
+		}
+		return keyCode;
+	}
+	,exec: function() {
+		window.addEventListener("keydown",$bind(this,this.handleKeyEvent),false);
+		window.addEventListener("keyup",$bind(this,this.handleKeyEvent),false);
+		window.addEventListener("focus",$bind(this,this.handleWindowEvent),false);
+		window.addEventListener("blur",$bind(this,this.handleWindowEvent),false);
+		window.addEventListener("resize",$bind(this,this.handleWindowEvent),false);
+		window.addEventListener("beforeunload",$bind(this,this.handleWindowEvent),false);
+		window.addEventListener("devicemotion",$bind(this,this.handleSensorEvent),false);
+		
+			if (!CanvasRenderingContext2D.prototype.isPointInStroke) {
+				CanvasRenderingContext2D.prototype.isPointInStroke = function (path, x, y) {
+					return false;
+				};
+			}
+			if (!CanvasRenderingContext2D.prototype.isPointInPath) {
+				CanvasRenderingContext2D.prototype.isPointInPath = function (path, x, y) {
+					return false;
+				};
+			}
+
+			if ('performance' in window == false) {
+				window.performance = {};
+			}
+
+			if ('now' in window.performance == false) {
+				var offset = Date.now();
+				if (performance.timing && performance.timing.navigationStart) {
+					offset = performance.timing.navigationStart
+				}
+				window.performance.now = function now() {
+					return Date.now() - offset;
+				}
+			}
+
+			var lastTime = 0;
+			var vendors = ['ms', 'moz', 'webkit', 'o'];
+			for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+				window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+				window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+			}
+
+			if (!window.requestAnimationFrame)
+				window.requestAnimationFrame = function(callback, element) {
+					var currTime = new Date().getTime();
+					var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+					var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+					  timeToCall);
+					lastTime = currTime + timeToCall;
+					return id;
+				};
+
+			if (!window.cancelAnimationFrame)
+				window.cancelAnimationFrame = function(id) {
+					clearTimeout(id);
+				};
+
+			window.requestAnimFrame = window.requestAnimationFrame;
+		;
+		this.lastUpdate = new Date().getTime();
+		this.handleApplicationEvent();
+		return 0;
+	}
+	,exit: function() {
+	}
+	,handleApplicationEvent: function(__) {
+		var _g = 0;
+		var _g1 = this.parent.__windows;
+		while(_g < _g1.length) {
+			var $window = _g1[_g];
+			++_g;
+			$window.__backend.updateSize();
+		}
+		this.updateGameDevices();
+		this.currentUpdate = new Date().getTime();
+		if(this.currentUpdate >= this.nextUpdate) {
+			this.deltaTime = this.currentUpdate - this.lastUpdate;
+			var _g2 = 0;
+			var _g3 = this.parent.__windows;
+			while(_g2 < _g3.length) {
+				var window1 = _g3[_g2];
+				++_g2;
+				this.parent.onUpdate.dispatch(this.deltaTime | 0);
+				if(window1.context != null) {
+					window1.onRender.dispatch(window1.context);
+				}
+			}
+			if(this.framePeriod < 0) {
+				this.nextUpdate = this.currentUpdate;
+			} else {
+				this.nextUpdate = this.currentUpdate - this.currentUpdate % this.framePeriod + this.framePeriod;
+			}
+			this.lastUpdate = this.currentUpdate;
+		}
+		window.requestAnimationFrame($bind(this,this.handleApplicationEvent));
+	}
+	,handleKeyEvent: function(event) {
+		if(this.parent.__window != null) {
+			var keyCode = this.convertKeyCode(event.keyCode != null ? event.keyCode : event.which);
+			var modifier = (event.shiftKey ? 3 : 0) | (event.ctrlKey ? 192 : 0) | (event.altKey ? 768 : 0) | (event.metaKey ? 3072 : 0);
+			if(event.type == "keydown") {
+				this.parent.__window.onKeyDown.dispatch(keyCode,modifier);
+				if(this.parent.__window.onKeyDown.canceled && event.cancelable) {
+					event.preventDefault();
+				}
+			} else {
+				this.parent.__window.onKeyUp.dispatch(keyCode,modifier);
+				if(this.parent.__window.onKeyUp.canceled && event.cancelable) {
+					event.preventDefault();
+				}
+			}
+		}
+	}
+	,handleSensorEvent: function(event) {
+		this.accelerometer.onUpdate.dispatch(event.accelerationIncludingGravity.x,event.accelerationIncludingGravity.y,event.accelerationIncludingGravity.z);
+	}
+	,handleWindowEvent: function(event) {
+		if(this.parent.__window != null) {
+			switch(event.type) {
+			case "beforeunload":
+				break;
+			case "blur":
+				this.parent.__window.onFocusOut.dispatch();
+				this.parent.__window.onDeactivate.dispatch();
+				break;
+			case "focus":
+				this.parent.__window.onFocusIn.dispatch();
+				this.parent.__window.onActivate.dispatch();
+				break;
+			case "resize":
+				this.parent.__window.__backend.handleResizeEvent(event);
+				break;
+			}
+		}
+	}
+	,updateGameDevices: function() {
+		var devices = lime_ui_Joystick.__getDeviceData();
+		if(devices == null) {
+			return;
+		}
+		var id;
+		var gamepad;
+		var joystick;
+		var data;
+		var cache;
+		var _g = 0;
+		var _g1 = devices.length;
+		while(_g < _g1) {
+			var i = _g++;
+			id = i;
+			data = devices[id];
+			if(data == null) {
+				continue;
+			}
+			if(!this.gameDeviceCache.h.hasOwnProperty(id)) {
+				cache = new lime__$internal_backend_html5_GameDeviceData();
+				cache.id = id;
+				cache.connected = data.connected;
+				var _g2 = 0;
+				var _g11 = data.buttons.length;
+				while(_g2 < _g11) {
+					var i1 = _g2++;
+					cache.buttons.push(data.buttons[i1].value);
+				}
+				var _g21 = 0;
+				var _g3 = data.axes.length;
+				while(_g21 < _g3) {
+					var i2 = _g21++;
+					cache.axes.push(data.axes[i2]);
+				}
+				if(data.mapping == "standard") {
+					cache.isGamepad = true;
+				}
+				this.gameDeviceCache.h[id] = cache;
+				if(data.connected) {
+					lime_ui_Joystick.__connect(id);
+					if(cache.isGamepad) {
+						lime_ui_Gamepad.__connect(id);
+					}
+				}
+			}
+			cache = this.gameDeviceCache.h[id];
+			joystick = lime_ui_Joystick.devices.h[id];
+			gamepad = lime_ui_Gamepad.devices.h[id];
+			if(data.connected) {
+				var button;
+				var value;
+				var _g4 = 0;
+				var _g12 = data.buttons.length;
+				while(_g4 < _g12) {
+					var i3 = _g4++;
+					value = data.buttons[i3].value;
+					if(value != cache.buttons[i3]) {
+						if(i3 == 6) {
+							joystick.onAxisMove.dispatch(data.axes.length,value);
+							if(gamepad != null) {
+								gamepad.onAxisMove.dispatch(4,value);
+							}
+						} else if(i3 == 7) {
+							joystick.onAxisMove.dispatch(data.axes.length + 1,value);
+							if(gamepad != null) {
+								gamepad.onAxisMove.dispatch(5,value);
+							}
+						} else {
+							if(value > 0) {
+								joystick.onButtonDown.dispatch(i3);
+							} else {
+								joystick.onButtonUp.dispatch(i3);
+							}
+							if(gamepad != null) {
+								switch(i3) {
+								case 0:
+									button = 0;
+									break;
+								case 1:
+									button = 1;
+									break;
+								case 2:
+									button = 2;
+									break;
+								case 3:
+									button = 3;
+									break;
+								case 4:
+									button = 9;
+									break;
+								case 5:
+									button = 10;
+									break;
+								case 8:
+									button = 4;
+									break;
+								case 9:
+									button = 6;
+									break;
+								case 10:
+									button = 7;
+									break;
+								case 11:
+									button = 8;
+									break;
+								case 12:
+									button = 11;
+									break;
+								case 13:
+									button = 12;
+									break;
+								case 14:
+									button = 13;
+									break;
+								case 15:
+									button = 14;
+									break;
+								case 16:
+									button = 5;
+									break;
+								default:
+									continue;
+								}
+								if(value > 0) {
+									gamepad.onButtonDown.dispatch(button);
+								} else {
+									gamepad.onButtonUp.dispatch(button);
+								}
+							}
+						}
+						cache.buttons[i3] = value;
+					}
+				}
+				var _g22 = 0;
+				var _g31 = data.axes.length;
+				while(_g22 < _g31) {
+					var i4 = _g22++;
+					if(data.axes[i4] != cache.axes[i4]) {
+						joystick.onAxisMove.dispatch(i4,data.axes[i4]);
+						if(gamepad != null) {
+							gamepad.onAxisMove.dispatch(i4,data.axes[i4]);
+						}
+						cache.axes[i4] = data.axes[i4];
+					}
+				}
+			} else if(cache.connected) {
+				cache.connected = false;
+				lime_ui_Joystick.__disconnect(id);
+				lime_ui_Gamepad.__disconnect(id);
+			}
+		}
+	}
+	,__class__: lime__$internal_backend_html5_HTML5Application
+};
+var lime_app_Application = function() {
+	this.onCreateWindow = new lime_app__$Event_$lime_$ui_$Window_$Void();
+	this.onUpdate = new lime_app__$Event_$Int_$Void();
+	lime_app_Module.call(this);
+	if(lime_app_Application.current == null) {
+		lime_app_Application.current = this;
+	}
+	this.meta = new haxe_ds_StringMap();
+	this.modules = [];
+	this.__windowByID = new haxe_ds_IntMap();
+	this.__windows = [];
+	this.__backend = new lime__$internal_backend_html5_HTML5Application(this);
+	this.__registerLimeModule(this);
+	this.__preloader = new lime_utils_Preloader();
+	this.__preloader.onProgress.add($bind(this,this.onPreloadProgress));
+	this.__preloader.onComplete.add($bind(this,this.onPreloadComplete));
+};
+$hxClasses["lime.app.Application"] = lime_app_Application;
+lime_app_Application.__name__ = "lime.app.Application";
+lime_app_Application.__super__ = lime_app_Module;
+lime_app_Application.prototype = $extend(lime_app_Module.prototype,{
+	meta: null
+	,modules: null
+	,onUpdate: null
+	,onCreateWindow: null
+	,preloader: null
+	,window: null
+	,windows: null
+	,__backend: null
+	,__preloader: null
+	,__window: null
+	,__windowByID: null
+	,__windows: null
+	,addModule: function(module) {
+		module.__registerLimeModule(this);
+		this.modules.push(module);
+	}
+	,createWindow: function(attributes) {
+		var $window = this.__createWindow(attributes);
+		this.__addWindow($window);
+		return $window;
+	}
+	,exec: function() {
+		lime_app_Application.current = this;
+		return this.__backend.exec();
+	}
+	,onGamepadAxisMove: function(gamepad,axis,value) {
+	}
+	,onGamepadButtonDown: function(gamepad,button) {
+	}
+	,onGamepadButtonUp: function(gamepad,button) {
+	}
+	,onGamepadConnect: function(gamepad) {
+	}
+	,onGamepadDisconnect: function(gamepad) {
+	}
+	,onJoystickAxisMove: function(joystick,axis,value) {
+	}
+	,onJoystickButtonDown: function(joystick,button) {
+	}
+	,onJoystickButtonUp: function(joystick,button) {
+	}
+	,onJoystickConnect: function(joystick) {
+	}
+	,onJoystickDisconnect: function(joystick) {
+	}
+	,onJoystickHatMove: function(joystick,hat,position) {
+	}
+	,onJoystickTrackballMove: function(joystick,trackball,x,y) {
+	}
+	,onKeyDown: function(keyCode,modifier) {
+	}
+	,onKeyUp: function(keyCode,modifier) {
+	}
+	,onModuleExit: function(code) {
+	}
+	,onMouseDown: function(x,y,button) {
+	}
+	,onMouseMove: function(x,y) {
+	}
+	,onMouseMoveRelative: function(x,y) {
+	}
+	,onMouseUp: function(x,y,button) {
+	}
+	,onMouseWheel: function(deltaX,deltaY,deltaMode) {
+	}
+	,onPreloadComplete: function() {
+	}
+	,onPreloadProgress: function(loaded,total) {
+	}
+	,onRenderContextLost: function() {
+	}
+	,onRenderContextRestored: function(context) {
+	}
+	,onTextEdit: function(text,start,length) {
+	}
+	,onTextInput: function(text) {
+	}
+	,onTouchCancel: function(touch) {
+	}
+	,onTouchEnd: function(touch) {
+	}
+	,onTouchMove: function(touch) {
+	}
+	,onTouchStart: function(touch) {
+	}
+	,onWindowActivate: function() {
+	}
+	,onWindowClose: function() {
+	}
+	,onWindowCreate: function() {
+	}
+	,onWindowDeactivate: function() {
+	}
+	,onWindowDropFile: function(file) {
+	}
+	,onWindowEnter: function() {
+	}
+	,onWindowExpose: function() {
+	}
+	,onWindowFocusIn: function() {
+	}
+	,onWindowFocusOut: function() {
+	}
+	,onWindowFullscreen: function() {
+	}
+	,onWindowLeave: function() {
+	}
+	,onWindowMove: function(x,y) {
+	}
+	,onWindowMinimize: function() {
+	}
+	,onWindowResize: function(width,height) {
+	}
+	,onWindowRestore: function() {
+	}
+	,removeModule: function(module) {
+		if(module != null) {
+			module.__unregisterLimeModule(this);
+			HxOverrides.remove(this.modules,module);
+		}
+	}
+	,render: function(context) {
+	}
+	,update: function(deltaTime) {
+	}
+	,__addWindow: function($window) {
+		if($window != null) {
+			this.__windows.push($window);
+			this.__windowByID.h[$window.id] = $window;
+			var f = $bind(this,this.__onWindowClose);
+			var window1 = $window;
+			var tmp = function() {
+				f(window1);
+			};
+			$window.onClose.add(tmp,false,-10000);
+			if(this.__window == null) {
+				this.__window = $window;
+				$window.onActivate.add($bind(this,this.onWindowActivate));
+				$window.onRenderContextLost.add($bind(this,this.onRenderContextLost));
+				$window.onRenderContextRestored.add($bind(this,this.onRenderContextRestored));
+				$window.onDeactivate.add($bind(this,this.onWindowDeactivate));
+				$window.onDropFile.add($bind(this,this.onWindowDropFile));
+				$window.onEnter.add($bind(this,this.onWindowEnter));
+				$window.onExpose.add($bind(this,this.onWindowExpose));
+				$window.onFocusIn.add($bind(this,this.onWindowFocusIn));
+				$window.onFocusOut.add($bind(this,this.onWindowFocusOut));
+				$window.onFullscreen.add($bind(this,this.onWindowFullscreen));
+				$window.onKeyDown.add($bind(this,this.onKeyDown));
+				$window.onKeyUp.add($bind(this,this.onKeyUp));
+				$window.onLeave.add($bind(this,this.onWindowLeave));
+				$window.onMinimize.add($bind(this,this.onWindowMinimize));
+				$window.onMouseDown.add($bind(this,this.onMouseDown));
+				$window.onMouseMove.add($bind(this,this.onMouseMove));
+				$window.onMouseMoveRelative.add($bind(this,this.onMouseMoveRelative));
+				$window.onMouseUp.add($bind(this,this.onMouseUp));
+				$window.onMouseWheel.add($bind(this,this.onMouseWheel));
+				$window.onMove.add($bind(this,this.onWindowMove));
+				$window.onRender.add($bind(this,this.render));
+				$window.onResize.add($bind(this,this.onWindowResize));
+				$window.onRestore.add($bind(this,this.onWindowRestore));
+				$window.onTextEdit.add($bind(this,this.onTextEdit));
+				$window.onTextInput.add($bind(this,this.onTextInput));
+				this.onWindowCreate();
+			}
+			this.onCreateWindow.dispatch($window);
+		}
+	}
+	,__createWindow: function(attributes) {
+		var $window = new lime_ui_Window(this,attributes);
+		if($window.id == -1) {
+			return null;
+		}
+		return $window;
+	}
+	,__registerLimeModule: function(application) {
+		application.onUpdate.add($bind(this,this.update));
+		application.onExit.add($bind(this,this.onModuleExit),false,0);
+		application.onExit.add($bind(this,this.__onModuleExit),false,0);
+		var gamepad = lime_ui_Gamepad.devices.iterator();
+		while(gamepad.hasNext()) {
+			var gamepad1 = gamepad.next();
+			this.__onGamepadConnect(gamepad1);
+		}
+		lime_ui_Gamepad.onConnect.add($bind(this,this.__onGamepadConnect));
+		var joystick = lime_ui_Joystick.devices.iterator();
+		while(joystick.hasNext()) {
+			var joystick1 = joystick.next();
+			this.__onJoystickConnect(joystick1);
+		}
+		lime_ui_Joystick.onConnect.add($bind(this,this.__onJoystickConnect));
+		lime_ui_Touch.onCancel.add($bind(this,this.onTouchCancel));
+		lime_ui_Touch.onStart.add($bind(this,this.onTouchStart));
+		lime_ui_Touch.onMove.add($bind(this,this.onTouchMove));
+		lime_ui_Touch.onEnd.add($bind(this,this.onTouchEnd));
+	}
+	,__removeWindow: function($window) {
+		if($window != null && this.__windowByID.h.hasOwnProperty($window.id)) {
+			if(this.__window == $window) {
+				this.__window = null;
+			}
+			HxOverrides.remove(this.__windows,$window);
+			this.__windowByID.remove($window.id);
+			$window.close();
+			if(this.__windows.length == 0) {
+				lime_system_System.exit(0);
+			}
+		}
+	}
+	,__onGamepadConnect: function(gamepad) {
+		this.onGamepadConnect(gamepad);
+		var f = $bind(this,this.onGamepadAxisMove);
+		var gamepad1 = gamepad;
+		var tmp = function(axis,value) {
+			f(gamepad1,axis,value);
+		};
+		gamepad.onAxisMove.add(tmp);
+		var f1 = $bind(this,this.onGamepadButtonDown);
+		var gamepad2 = gamepad;
+		var tmp1 = function(button) {
+			f1(gamepad2,button);
+		};
+		gamepad.onButtonDown.add(tmp1);
+		var f2 = $bind(this,this.onGamepadButtonUp);
+		var gamepad3 = gamepad;
+		var tmp2 = function(button1) {
+			f2(gamepad3,button1);
+		};
+		gamepad.onButtonUp.add(tmp2);
+		var f3 = $bind(this,this.onGamepadDisconnect);
+		var gamepad4 = gamepad;
+		var tmp3 = function() {
+			f3(gamepad4);
+		};
+		gamepad.onDisconnect.add(tmp3);
+	}
+	,__onJoystickConnect: function(joystick) {
+		this.onJoystickConnect(joystick);
+		var f = $bind(this,this.onJoystickAxisMove);
+		var joystick1 = joystick;
+		var tmp = function(axis,value) {
+			f(joystick1,axis,value);
+		};
+		joystick.onAxisMove.add(tmp);
+		var f1 = $bind(this,this.onJoystickButtonDown);
+		var joystick2 = joystick;
+		var tmp1 = function(button) {
+			f1(joystick2,button);
+		};
+		joystick.onButtonDown.add(tmp1);
+		var f2 = $bind(this,this.onJoystickButtonUp);
+		var joystick3 = joystick;
+		var tmp2 = function(button1) {
+			f2(joystick3,button1);
+		};
+		joystick.onButtonUp.add(tmp2);
+		var f3 = $bind(this,this.onJoystickDisconnect);
+		var joystick4 = joystick;
+		var tmp3 = function() {
+			f3(joystick4);
+		};
+		joystick.onDisconnect.add(tmp3);
+		var f4 = $bind(this,this.onJoystickHatMove);
+		var joystick5 = joystick;
+		var tmp4 = function(hat,position) {
+			f4(joystick5,hat,position);
+		};
+		joystick.onHatMove.add(tmp4);
+		var f5 = $bind(this,this.onJoystickTrackballMove);
+		var joystick6 = joystick;
+		var tmp5 = function(trackball,x,y) {
+			f5(joystick6,trackball,x,y);
+		};
+		joystick.onTrackballMove.add(tmp5);
+	}
+	,__onModuleExit: function(code) {
+		this.__backend.exit();
+	}
+	,__onWindowClose: function($window) {
+		if(this.__window == $window) {
+			this.onWindowClose();
+		}
+		this.__removeWindow($window);
+	}
+	,__unregisterLimeModule: function(application) {
+		application.onUpdate.remove($bind(this,this.update));
+		application.onExit.remove($bind(this,this.__onModuleExit));
+		application.onExit.remove($bind(this,this.onModuleExit));
+		lime_ui_Gamepad.onConnect.remove($bind(this,this.__onGamepadConnect));
+		lime_ui_Joystick.onConnect.remove($bind(this,this.__onJoystickConnect));
+		lime_ui_Touch.onCancel.remove($bind(this,this.onTouchCancel));
+		lime_ui_Touch.onStart.remove($bind(this,this.onTouchStart));
+		lime_ui_Touch.onMove.remove($bind(this,this.onTouchMove));
+		lime_ui_Touch.onEnd.remove($bind(this,this.onTouchEnd));
+		this.onModuleExit(0);
+	}
+	,get_preloader: function() {
+		return this.__preloader;
+	}
+	,get_window: function() {
+		return this.__window;
+	}
+	,get_windows: function() {
+		return this.__windows;
+	}
+	,__class__: lime_app_Application
+	,__properties__: {get_windows:"get_windows",get_window:"get_window",get_preloader:"get_preloader"}
+});
+var ApplicationMain = function() { };
+$hxClasses["ApplicationMain"] = ApplicationMain;
+ApplicationMain.__name__ = "ApplicationMain";
+ApplicationMain.main = function() {
+	lime_system_System.__registerEntryPoint("AddingAnimation",ApplicationMain.create);
+};
+ApplicationMain.create = function(config) {
+	var app = new openfl_display_Application();
+	ManifestResources.init(config);
+	var _this = app.meta;
+	if(__map_reserved["build"] != null) {
+		_this.setReserved("build","25");
+	} else {
+		_this.h["build"] = "25";
+	}
+	var _this1 = app.meta;
+	if(__map_reserved["company"] != null) {
+		_this1.setReserved("company","OpenFL");
+	} else {
+		_this1.h["company"] = "OpenFL";
+	}
+	var _this2 = app.meta;
+	if(__map_reserved["file"] != null) {
+		_this2.setReserved("file","AddingAnimation");
+	} else {
+		_this2.h["file"] = "AddingAnimation";
+	}
+	var _this3 = app.meta;
+	if(__map_reserved["name"] != null) {
+		_this3.setReserved("name","Adding Animation");
+	} else {
+		_this3.h["name"] = "Adding Animation";
+	}
+	var _this4 = app.meta;
+	if(__map_reserved["packageName"] != null) {
+		_this4.setReserved("packageName","org.openfl.samples.addinganimation");
+	} else {
+		_this4.h["packageName"] = "org.openfl.samples.addinganimation";
+	}
+	var _this5 = app.meta;
+	if(__map_reserved["version"] != null) {
+		_this5.setReserved("version","1.0.0");
+	} else {
+		_this5.h["version"] = "1.0.0";
+	}
+	var attributes = { allowHighDPI : false, alwaysOnTop : false, borderless : false, element : null, frameRate : 60, height : 720, hidden : false, maximized : false, minimized : false, parameters : { }, resizable : true, title : "Adding Animation", width : 1280, x : null, y : null};
+	attributes.context = { antialiasing : 0, background : 16777215, colorDepth : 32, depth : true, hardware : true, stencil : true, type : null, vsync : false};
+	if(app.__window == null) {
+		if(config != null) {
+			var _g = 0;
+			var _g1 = Reflect.fields(config);
+			while(_g < _g1.length) {
+				var field = _g1[_g];
+				++_g;
+				if(Object.prototype.hasOwnProperty.call(attributes,field)) {
+					attributes[field] = Reflect.field(config,field);
+				} else if(Object.prototype.hasOwnProperty.call(attributes.context,field)) {
+					attributes.context[field] = Reflect.field(config,field);
+				}
+			}
+		}
+	}
+	app.createWindow(attributes);
+	var preloader = new openfl_display_Preloader(new openfl_display_DefaultPreloader());
+	app.__preloader.onProgress.add(function(loaded,total) {
+		preloader.update(loaded,total);
+	});
+	app.__preloader.onComplete.add(function() {
+		preloader.start();
+	});
+	var stage = (js_Boot.__cast(app.__window , openfl_display_Window)).stage;
+	var tmp = function() {
+		ApplicationMain.start(stage);
+	};
+	preloader.onComplete.add(tmp);
+	var _g2 = 0;
+	var _g11 = ManifestResources.preloadLibraries;
+	while(_g2 < _g11.length) {
+		var library = _g11[_g2];
+		++_g2;
+		app.__preloader.addLibrary(library);
+	}
+	var _g21 = 0;
+	var _g3 = ManifestResources.preloadLibraryNames;
+	while(_g21 < _g3.length) {
+		var name = _g3[_g21];
+		++_g21;
+		app.__preloader.addLibraryName(name);
+	}
+	app.__preloader.load();
+	var result = app.exec();
+};
+ApplicationMain.start = function(stage) {
+	try {
+		var current = stage.getChildAt(0);
+		if(current == null || !((current) instanceof openfl_display_DisplayObjectContainer)) {
+			current = new openfl_display_MovieClip();
+			stage.addChild(current);
+		}
+		new DocumentClass(current);
+		stage.dispatchEvent(new openfl_events_Event("resize",false,false));
+		if(stage.window.__fullscreen) {
+			stage.dispatchEvent(new openfl_events_FullScreenEvent("fullScreen",false,false,true,true));
+		}
+	} catch( e ) {
+		haxe_CallStack.lastException = e;
+		stage.__handleError(((e) instanceof js__$Boot_HaxeError) ? e.val : e);
+	}
+};
 var Main = function() {
 	this.gameSprite = null;
 	this.closeButton = null;
@@ -4594,6 +4778,7 @@ var Balloon = function(text) {
 	this.popped = false;
 	this.soundPop = openfl_utils_Assets.getSound("assets/sounds/eventually.wav");
 	openfl_display_Sprite.call(this);
+	this.set_buttonMode(true);
 	this.text = text;
 	this.sound = openfl_utils_Assets.getSound("assets/sounds/" + text.toLowerCase() + ".wav");
 	var color = this.randomColor();
@@ -7174,191 +7359,43 @@ EReg.prototype = {
 	}
 	,__class__: EReg
 };
-var hacksaw_Scene = function() {
-	openfl_display_Sprite.call(this);
-};
-$hxClasses["hacksaw.Scene"] = hacksaw_Scene;
-hacksaw_Scene.__name__ = "hacksaw.Scene";
-hacksaw_Scene.__super__ = openfl_display_Sprite;
-hacksaw_Scene.prototype = $extend(openfl_display_Sprite.prototype,{
-	onEnter: function(previous) {
-	}
-	,onExit: function(next) {
-	}
-	,onResize: function(event) {
-	}
-	,onFrameEnter: function(event) {
-	}
-	,onMouseOver: function(event) {
-	}
-	,onMouseDown: function(event) {
-	}
-	,onMouseUp: function(event) {
-	}
-	,onMouseClick: function(event) {
-	}
-	,__class__: hacksaw_Scene
-});
-var GameScene = function() {
-	this.interactable = true;
-	this.soundFinish = openfl_utils_Assets.getSound("assets/sounds/kids_cheering.wav");
-	hacksaw_Scene.call(this);
-	this.opaqueBackground = 51;
-};
-$hxClasses["GameScene"] = GameScene;
-GameScene.__name__ = "GameScene";
-GameScene.__super__ = hacksaw_Scene;
-GameScene.prototype = $extend(hacksaw_Scene.prototype,{
-	soundFinish: null
-	,particleSystem: null
-	,interactable: null
-	,renderer: null
-	,onEnter: function(previous) {
-	}
-	,finishWithSuccess: function() {
-		this.soundFinish.play();
-		this.particleSystem.emit(openfl_Lib.get_current().stage.stageWidth / 2,openfl_Lib.get_current().stage.stageHeight / 2);
-		haxe_Timer.delay($bind(this,this.onFinishWithSuccess),2000);
-	}
-	,onFinishWithSuccess: function() {
-		this.particleSystem.stop();
-		this.removeChildren();
-		hacksaw_SceneManager.restart();
-	}
-	,initParticles: function() {
-		this.renderer = org_zamedev_particles_renderers_DefaultParticleRenderer.createInstance();
-		this.addChild(this.renderer);
-		this.particleSystem = org_zamedev_particles_loaders_ParticleLoader.load("assets/particles/trippy.plist");
-		this.renderer.addParticleSystem(this.particleSystem);
-	}
-	,addExitButton: function() {
-		var tf = new DefaultTextField();
-		tf.set_text("X");
-		tf.set_x(0);
-		tf.set_y(0);
-		tf.addEventListener("mouseDown",$bind(this,this.closeGame));
-		this.addChild(tf);
-		tf = new DefaultTextField();
-		tf.set_text("C");
-		tf.set_x(openfl_Lib.get_current().stage.stageWidth - tf.get_width() - 5);
-		tf.set_y(0);
-		tf.addEventListener("mouseDown",function(e) {
-			hacksaw_SceneManager.push(hacksaw_SceneManager.get().getCurrentSceneName() + "Config");
-		});
-		this.addChild(tf);
-	}
-	,closeGame: function(e) {
-		hacksaw_SceneManager.pop();
-	}
-	,playSoundsInSequence: function(sounds,callback,stopInteracting) {
-		if(stopInteracting == null) {
-			stopInteracting = true;
-		}
-		var _gthis = this;
-		if(sounds.length == 0) {
-			this.interactable = true;
-			if(callback != null) {
-				callback();
-			}
-			return;
-		}
-		if(stopInteracting) {
-			this.interactable = false;
-		}
-		var element = sounds[0];
-		if(((element) instanceof openfl_media_Sound)) {
-			var sound = element;
-			var channel = sound.play();
-			channel.addEventListener("soundComplete",function(e) {
-				var tmp = sounds.slice(1);
-				_gthis.playSoundsInSequence(tmp,callback,stopInteracting);
-			});
-		} else if(typeof(element) == "number" && ((element | 0) === element)) {
-			var ms = element;
-			haxe_Timer.delay(function() {
-				var tmp1 = sounds.slice(1);
-				_gthis.playSoundsInSequence(tmp1,callback,stopInteracting);
-			},ms);
-		}
-	}
-	,__class__: GameScene
-});
 var GameBalloon = function() {
 	this.config = openfl_net_SharedObject.getLocal("GameBalloon");
-	this.balloons = new haxe_ds_IntMap();
-	this.soundWhere = openfl_utils_Assets.getSound("assets/sounds/where.wav");
-	this.currentNumber = 1;
-	GameScene.call(this);
-	this.opaqueBackground = 51;
+	AbstractClickAllGame.call(this,new strategies_NumberedBalloonCreator(this.minNumber(),this.maxNumber()),new strategies_SequentialChooser(true),this.randomLayout(),openfl_utils_Assets.getSound("assets/sounds/where.wav"),openfl_utils_Assets.getSound("assets/sounds/eventually.wav"));
 };
 $hxClasses["GameBalloon"] = GameBalloon;
 GameBalloon.__name__ = "GameBalloon";
-GameBalloon.__super__ = GameScene;
-GameBalloon.prototype = $extend(GameScene.prototype,{
-	currentNumber: null
-	,soundWhere: null
-	,balloons: null
-	,balloonGroup: null
-	,config: null
-	,clickNumber: function(e) {
-		if(!this.interactable) {
-			return;
-		}
-		var balloon = Balloon.getClickedBalloon(e);
-		if(balloon.get_number() == this.currentNumber) {
-			balloon.pop();
-			this.currentNumber++;
-			if(this.currentNumber > this.config.data.maxNumber) {
-				this.onMatchEnd();
-			} else {
-				haxe_Timer.delay($bind(this,this.startNumber),800);
-			}
-		} else {
-			balloon.sayNumber();
-		}
-	}
-	,onMatchEnd: function() {
-		this.finishWithSuccess();
-	}
-	,startNumber: function() {
-		var b = this.currentBalloon();
-		if(b != null) {
-			this.playSoundsInSequence([this.soundWhere,b.sound,500]);
-		}
-	}
-	,currentBalloon: function() {
-		return this.balloons.h[this.currentNumber];
-	}
+GameBalloon.__super__ = AbstractClickAllGame;
+GameBalloon.prototype = $extend(AbstractClickAllGame.prototype,{
+	config: null
 	,onEnter: function(previous) {
-		GameScene.prototype.onEnter.call(this,previous);
-		if(this.config.data.minNumber == null) {
-			this.config.data.minNumber = 1;
-		}
-		if(this.config.data.maxNumber == null) {
-			this.config.data.maxNumber = 10;
-		}
-		this.currentNumber = this.config.data.minNumber;
-		this.balloons.h = { };
-		this.removeChildren();
-		this.createBalloons();
-		this.addExitButton();
-		this.initParticles();
-		this.startNumber();
+		this.creator = new strategies_NumberedBalloonCreator(this.minNumber(),this.maxNumber());
+		AbstractClickAllGame.prototype.onEnter.call(this,previous);
 	}
-	,createBalloons: function() {
-		this.balloonGroup = new feathers_controls_LayoutGroup();
-		var layout = new RandomLayout();
-		layout.avoidCollision = true;
-		this.balloonGroup.set_layout(layout);
-		this.addChild(this.balloonGroup);
-		var i = this.config.data.maxNumber;
-		while(i >= this.config.data.minNumber) {
-			var balloon = new Balloon("" + i);
-			balloon.addEventListener("mouseDown",$bind(this,this.clickNumber));
-			this.balloonGroup.addChild(balloon);
-			this.balloons.h[i] = balloon;
-			--i;
+	,minNumber: function() {
+		var x = this.config.data.minNumber;
+		if(x == null) {
+			return 1;
+		} else {
+			return x;
 		}
+	}
+	,maxNumber: function() {
+		var x = this.config.data.maxNumber;
+		if(x == null) {
+			return 10;
+		} else {
+			return x;
+		}
+	}
+	,soundsForSprite: function(sprite) {
+		var balloon = sprite;
+		return [balloon.sound];
+	}
+	,randomLayout: function() {
+		var group = new feathers_controls_LayoutGroup();
+		group.set_layout(new RandomLayout());
+		return group;
 	}
 	,__class__: GameBalloon
 });
@@ -8463,159 +8500,18 @@ GameReading.prototype = $extend(GameScene.prototype,{
 	,__class__: GameReading
 });
 var GameShapes = function() {
-	this.particleTap = org_zamedev_particles_loaders_ParticleLoader.load("assets/particles/dust.plist");
-	this.soundPop = openfl_utils_Assets.getSound("assets/sounds/eventually.wav");
-	this.soundWhere = openfl_utils_Assets.getSound("assets/sounds/where-the.wav");
-	this.creator = new SpriteCreator();
-	GameScene.call(this);
+	AbstractClickAllGame.call(this,new strategies_ShapeCreator(),new strategies_RandomChooser(),new openfl_display_Sprite(),openfl_utils_Assets.getSound("assets/sounds/where-the.wav"),openfl_utils_Assets.getSound("assets/sounds/eventually.wav"));
 };
 $hxClasses["GameShapes"] = GameShapes;
 GameShapes.__name__ = "GameShapes";
-GameShapes.__super__ = GameScene;
-GameShapes.prototype = $extend(GameScene.prototype,{
-	creator: null
-	,chooser: null
-	,soundWhere: null
-	,soundPop: null
-	,particleTap: null
-	,onEnter: function(previous) {
-		var _gthis = this;
-		GameScene.prototype.onEnter.call(this,previous);
-		this.removeChildren();
-		var sprites = this.creator.createSprites();
-		var _g = 0;
-		while(_g < sprites.length) {
-			var s = [sprites[_g]];
-			++_g;
-			this.addChild(s[0]);
-			var tmp = (function(s1) {
-				return function(e) {
-					_gthis.clickedSprite(s1[0]);
-					return;
-				};
-			})(s);
-			s[0].addEventListener("mouseDown",tmp);
-		}
-		this.chooser = new RandomChooser(sprites);
-		this.addExitButton();
-		this.initParticles();
-		this.renderer.addParticleSystem(this.particleTap);
-		this.chooser.next();
-		this.askPlayer();
-	}
-	,clickedSprite: function(sprite) {
-		var _gthis = this;
-		if(!this.interactable) {
-			return;
-		}
-		var correct = sprite == this.chooser.current();
-		if(correct) {
-			this.soundPop.play();
-			this.emitParticles(sprite);
-			this.removeChild(sprite);
-		}
-		this.playSoundsInSequence([sprite.soundColor,sprite.soundShape],function() {
-			if(correct) {
-				_gthis.chooser.next();
-				_gthis.askPlayer();
-			}
-		});
-	}
-	,askPlayer: function() {
-		if(!this.chooser.finished()) {
-			var shape = this.chooser.current();
-			this.playSoundsInSequence([this.soundWhere,shape.soundColor,shape.soundShape,500]);
-		}
-	}
-	,emitParticles: function(sprite) {
-		var _gthis = this;
-		var deltaX = sprite.get_width() / 5;
-		var deltaY = sprite.get_height() / 5;
-		var centerX = sprite.get_x() + sprite.get_width() / 2;
-		var centerY = sprite.get_y() + sprite.get_width() / 2;
-		haxe_Timer.delay(function() {
-			_gthis.particleTap.emit(centerX - deltaX,centerY);
-		},0);
-		haxe_Timer.delay(function() {
-			_gthis.particleTap.emit(centerX + deltaX,centerY);
-		},50);
-		haxe_Timer.delay(function() {
-			_gthis.particleTap.emit(centerX,centerY - deltaY);
-		},100);
-		haxe_Timer.delay(function() {
-			_gthis.particleTap.emit(centerX,centerY + deltaY);
-		},150);
+GameShapes.__super__ = AbstractClickAllGame;
+GameShapes.prototype = $extend(AbstractClickAllGame.prototype,{
+	soundsForSprite: function(sprite) {
+		var shape = sprite;
+		return [shape.soundColor,shape.soundShape];
 	}
 	,__class__: GameShapes
 });
-var RandomChooser = function(s) {
-	this.currentSprite = null;
-	this.sprites = s;
-};
-$hxClasses["RandomChooser"] = RandomChooser;
-RandomChooser.__name__ = "RandomChooser";
-RandomChooser.prototype = {
-	sprites: null
-	,currentSprite: null
-	,nextIndex: function() {
-		return Std.random(this.sprites.length);
-	}
-	,next: function() {
-		this.currentSprite = this.sprites[this.nextIndex()];
-		HxOverrides.remove(this.sprites,this.currentSprite);
-		return this.currentSprite;
-	}
-	,current: function() {
-		return this.currentSprite;
-	}
-	,finished: function() {
-		if(this.currentSprite == null) {
-			return this.sprites.length == 0;
-		} else {
-			return false;
-		}
-	}
-	,hasNext: function() {
-		return this.sprites.length > 0;
-	}
-	,__class__: RandomChooser
-};
-var SpriteCreator = function() {
-	this.colors = ["red","yellow","blue"];
-	this.shapes = ["star","square","circle"];
-};
-$hxClasses["SpriteCreator"] = SpriteCreator;
-SpriteCreator.__name__ = "SpriteCreator";
-SpriteCreator.prototype = {
-	shapes: null
-	,colors: null
-	,createSprites: function() {
-		var x = 0;
-		var y = 0;
-		var array = [];
-		var _g = 0;
-		var _g1 = this.shapes;
-		while(_g < _g1.length) {
-			var shape = _g1[_g];
-			++_g;
-			var _g2 = 0;
-			var _g11 = this.colors;
-			while(_g2 < _g11.length) {
-				var color = _g11[_g2];
-				++_g2;
-				var obj = new Shape(shape,color);
-				obj.set_x(x * 250 + 200);
-				obj.set_y(y * 200 + 80);
-				array.push(obj);
-				++x;
-			}
-			x = 0;
-			++y;
-		}
-		return array;
-	}
-	,__class__: SpriteCreator
-};
 var GameZoombini = function() {
 	this.soundDontLike = openfl_utils_Assets.getSound("assets/sounds/idontlike.wav");
 	this.soundLike = openfl_utils_Assets.getSound("assets/sounds/ilike.wav");
@@ -8803,8 +8699,10 @@ MainMenu.__super__ = hacksaw_Scene;
 MainMenu.prototype = $extend(hacksaw_Scene.prototype,{
 	group: null
 	,onEnter: function(previous) {
+		this.removeChildren();
 		this.addChild(this.group);
 		this.group.set_layout(new feathers_layout_VerticalLayout());
+		this.group.removeChildren();
 		this.addItem("Play balloons","GameBalloon");
 		this.addItem("Play lamps","GameLamp");
 		this.addItem("Play shapes","GameShapes");
@@ -9377,6 +9275,7 @@ var Shape = function(shapeName,colorName) {
 	openfl_display_Sprite.call(this);
 	this.shapeName = shapeName;
 	this.colorName = colorName;
+	this.set_buttonMode(true);
 	this.bitmap = new openfl_display_Bitmap(openfl_utils_Assets.getBitmapData("assets/images/" + shapeName + "-" + colorName + ".png"));
 	this.soundShape = openfl_utils_Assets.getSound("assets/sounds/" + shapeName + ".wav");
 	this.soundColor = openfl_utils_Assets.getSound("assets/sounds/" + colorName + ".wav");
@@ -37840,7 +37739,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 650986;
+	this.version = 83719;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -87708,13 +87607,150 @@ org_zamedev_particles_util_XmlExt.innerText = function(node,def) {
 	}
 	return def;
 };
+var strategies_AbstractItemChooser = function() {
+	this.currentItem = null;
+};
+$hxClasses["strategies.AbstractItemChooser"] = strategies_AbstractItemChooser;
+strategies_AbstractItemChooser.__name__ = "strategies.AbstractItemChooser";
+strategies_AbstractItemChooser.prototype = {
+	items: null
+	,currentItem: null
+	,nextIndex: function() {
+		return 0;
+	}
+	,next: function() {
+		this.currentItem = this.items[this.nextIndex()];
+		HxOverrides.remove(this.items,this.currentItem);
+		return this.currentItem;
+	}
+	,current: function() {
+		return this.currentItem;
+	}
+	,finished: function() {
+		if(this.currentItem == null) {
+			return this.items.length == 0;
+		} else {
+			return false;
+		}
+	}
+	,hasNext: function() {
+		return this.items.length > 0;
+	}
+	,__class__: strategies_AbstractItemChooser
+};
+var strategies_AbstractSpriteCreator = function() { };
+$hxClasses["strategies.AbstractSpriteCreator"] = strategies_AbstractSpriteCreator;
+strategies_AbstractSpriteCreator.__name__ = "strategies.AbstractSpriteCreator";
+strategies_AbstractSpriteCreator.__isInterface__ = true;
+strategies_AbstractSpriteCreator.prototype = {
+	createSprites: null
+	,__class__: strategies_AbstractSpriteCreator
+};
+var strategies_NumberedBalloonCreator = function(minNumber,maxNumber) {
+	if(maxNumber == null) {
+		maxNumber = 10;
+	}
+	if(minNumber == null) {
+		minNumber = 1;
+	}
+	this.minNumber = minNumber;
+	this.maxNumber = maxNumber;
+};
+$hxClasses["strategies.NumberedBalloonCreator"] = strategies_NumberedBalloonCreator;
+strategies_NumberedBalloonCreator.__name__ = "strategies.NumberedBalloonCreator";
+strategies_NumberedBalloonCreator.__interfaces__ = [strategies_AbstractSpriteCreator];
+strategies_NumberedBalloonCreator.prototype = {
+	minNumber: null
+	,maxNumber: null
+	,createSprites: function() {
+		var sprites = [];
+		var i = this.maxNumber;
+		while(i >= this.minNumber) {
+			var balloon = new Balloon("" + i);
+			sprites.push(balloon);
+			--i;
+		}
+		return sprites;
+	}
+	,__class__: strategies_NumberedBalloonCreator
+};
+var strategies_RandomChooser = function() {
+	strategies_AbstractItemChooser.call(this);
+};
+$hxClasses["strategies.RandomChooser"] = strategies_RandomChooser;
+strategies_RandomChooser.__name__ = "strategies.RandomChooser";
+strategies_RandomChooser.__super__ = strategies_AbstractItemChooser;
+strategies_RandomChooser.prototype = $extend(strategies_AbstractItemChooser.prototype,{
+	nextIndex: function() {
+		return Std.random(this.items.length);
+	}
+	,__class__: strategies_RandomChooser
+});
+var strategies_SequentialChooser = function(reverse) {
+	if(reverse == null) {
+		reverse = false;
+	}
+	strategies_AbstractItemChooser.call(this);
+	this.reverse = reverse;
+};
+$hxClasses["strategies.SequentialChooser"] = strategies_SequentialChooser;
+strategies_SequentialChooser.__name__ = "strategies.SequentialChooser";
+strategies_SequentialChooser.__super__ = strategies_AbstractItemChooser;
+strategies_SequentialChooser.prototype = $extend(strategies_AbstractItemChooser.prototype,{
+	reverse: null
+	,nextIndex: function() {
+		if(this.reverse) {
+			return this.items.length - 1;
+		} else {
+			return 0;
+		}
+	}
+	,__class__: strategies_SequentialChooser
+});
+var strategies_ShapeCreator = function() {
+	this.colors = ["red","yellow","blue"];
+	this.shapes = ["star","square","circle"];
+};
+$hxClasses["strategies.ShapeCreator"] = strategies_ShapeCreator;
+strategies_ShapeCreator.__name__ = "strategies.ShapeCreator";
+strategies_ShapeCreator.__interfaces__ = [strategies_AbstractSpriteCreator];
+strategies_ShapeCreator.prototype = {
+	shapes: null
+	,colors: null
+	,createSprites: function() {
+		var x = 0;
+		var y = 0;
+		var array = [];
+		var _g = 0;
+		var _g1 = this.shapes;
+		while(_g < _g1.length) {
+			var shape = _g1[_g];
+			++_g;
+			var _g2 = 0;
+			var _g11 = this.colors;
+			while(_g2 < _g11.length) {
+				var color = _g11[_g2];
+				++_g2;
+				var obj = new Shape(shape,color);
+				obj.set_x(x * 250 + 200);
+				obj.set_y(y * 200 + 80);
+				array.push(obj);
+				++x;
+			}
+			x = 0;
+			++y;
+		}
+		return array;
+	}
+	,__class__: strategies_ShapeCreator
+};
 function $getIterator(o) { if( o instanceof Array ) return HxOverrides.iter(o); else return o.iterator(); }
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $global.$haxeUID++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = m.bind(o); o.hx__closures__[m.__id__] = f; } return f; }
 $global.$haxeUID |= 0;
-var init = lime__$internal_backend_html5_HTML5Application;
-var init = lime_app_Application;
 var __map_reserved = {};
 haxe_ds_ObjectMap.count = 0;
+var init = lime__$internal_backend_html5_HTML5Application;
+var init = lime_app_Application;
 if( String.fromCodePoint == null ) String.fromCodePoint = function(c) { return c < 0x10000 ? String.fromCharCode(c) : String.fromCharCode((c>>10)+0xD7C0)+String.fromCharCode((c&0x3FF)+0xDC00); }
 Object.defineProperty(js__$Boot_HaxeError.prototype,"message",{ get : function() {
 	return String(this.val);
